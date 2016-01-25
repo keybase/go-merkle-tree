@@ -1,9 +1,13 @@
 package merkleTree
 
-type Hasher func([]byte) Hash
+type Hasher interface {
+	Hash([]byte) Hash
+}
 
-type MerkleStorer interface {
-	GetHasher() Hasher
+type Engine interface {
+	Hasher
 	StoreNode(Hash, Node, []byte) error
 	CommitRoot(curr Hash, prev Hash, txinfo TxInfo) error
+	LookupNode(Hash) (*Node, error)
+	LookupRoot() (Hash, error)
 }

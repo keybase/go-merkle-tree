@@ -43,7 +43,7 @@ func (s *sortedMap) exportToNode(h Hasher, typ NodeType, prevRoot Hash, level Le
 	node.Type = typ
 	node.Tab = s.list
 	objExported, err = encodeToBytes(node)
-	hash = h(objExported)
+	hash = h.Hash(objExported)
 	return hash, node, objExported, err
 }
 
