@@ -20,3 +20,15 @@ func log256(y uint) uint {
 	}
 	return ret
 }
+
+func NewConfig(M,N uint) Config{
+	return Config{M : M, N : N, C : log256(M) }
+}
+
+func (c Config) prefixAtLevel(l Level, h Hash) []byte {
+	return h[(uint(l)*c.C):((uint(l)+1)*c.C)]
+}
+
+func (c Config) prefixThroughLevel(l Level, h Hash) []byte {
+	return h[0:((uint(l)+1)*c.C)]
+}

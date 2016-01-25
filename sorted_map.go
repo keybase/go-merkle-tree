@@ -4,22 +4,22 @@ import (
 	"sort"
 )
 
-type sortedMap struct {
+type SortedMap struct {
 	list []KeyValuePair
 }
 
-func newSortedMapFromSortedList(l []KeyValuePair) *sortedMap {
-	return &sortedMap{list: l}
+func NewSortedMapFromSortedList(l []KeyValuePair) *SortedMap {
+	return &SortedMap{list: l}
 }
 
-func newSortedMapFromList(l []KeyValuePair) *sortedMap {
-	ret := newSortedMapFromSortedList(l)
+func NewSortedMapFromList(l []KeyValuePair) *SortedMap {
+	ret := NewSortedMapFromSortedList(l)
 	ret.sort()
 	return ret
 }
 
-func newSortedMapFromKeyAndValue(kp KeyValuePair) *sortedMap {
-	return newSortedMapFromList([]KeyValuePair{kp})
+func NewSortedMapFromKeyAndValue(kp KeyValuePair) *SortedMap {
+	return NewSortedMapFromList([]KeyValuePair{kp})
 }
 
 type byKey []KeyValuePair
@@ -28,15 +28,15 @@ func (b byKey) Len() int           { return len(b) }
 func (b byKey) Swap(i, j int)      { b[i], b[j] = b[j], b[i] }
 func (b byKey) Less(i, j int) bool { return b[i].Key.Less(b[j].Key) }
 
-func (s *sortedMap) sort() {
+func (s *SortedMap) sort() {
 	sort.Sort(byKey(s.list))
 }
 
-func (s *sortedMap) push(kp KeyValuePair) {
+func (s *SortedMap) push(kp KeyValuePair) {
 	s.list = append(s.list, kp)
 }
 
-func (s *sortedMap) exportToNode(h Hasher, typ NodeType, prevRoot Hash, level Level) (hash Hash, node Node, objExported []byte, err error) {
+func (s *SortedMap) exportToNode(h Hasher, typ NodeType, prevRoot Hash, level Level) (hash Hash, node Node, objExported []byte, err error) {
 	if prevRoot != nil && level == Level(0) {
 		node.PrevRoot = prevRoot
 	}
@@ -47,7 +47,7 @@ func (s *sortedMap) exportToNode(h Hasher, typ NodeType, prevRoot Hash, level Le
 	return hash, node, objExported, err
 }
 
-func (s *sortedMap) binarySearch(k Hash) (ret int, eq bool) {
+func (s *SortedMap) binarySearch(k Hash) (ret int, eq bool) {
 	beg := 0
 	end := len(s.list) - 1
 
@@ -69,7 +69,7 @@ func (s *sortedMap) binarySearch(k Hash) (ret int, eq bool) {
 	return ret, eq
 }
 
-func (s *sortedMap) replace(kvp KeyValuePair) *sortedMap {
+func (s *SortedMap) replace(kvp KeyValuePair) *SortedMap {
 	if len(s.list) > 0 {
 		i, eq := s.binarySearch(kvp.Key)
 		j := i

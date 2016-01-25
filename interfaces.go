@@ -7,7 +7,7 @@ type Hasher interface {
 type Engine interface {
 	Hasher
 	StoreNode(Hash, Node, []byte) error
-	CommitRoot(curr Hash, prev Hash, txinfo TxInfo) error
+	CommitRoot(prev Hash, curr Hash, txinfo TxInfo) error
 	LookupNode(Hash) (*Node, error)
 	LookupRoot() (Hash, error)
 }
