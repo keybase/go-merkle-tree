@@ -47,7 +47,7 @@ func (s *sortedMap) exportToNode(h Hasher, typ NodeType, prevRoot Hash, level Le
 	return hash, node, objExported, err
 }
 
-func (s *sortedMap) binarySearch(k HexKey) (ret int, eq bool) {
+func (s *sortedMap) binarySearch(k Hash) (ret int, eq bool) {
 	beg := 0
 	end := len(s.list) - 1
 

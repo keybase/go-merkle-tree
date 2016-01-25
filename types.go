@@ -1,10 +1,12 @@
 package merkleTree
 
-type HexKey []byte
+type Hash []byte
+
+type TxInfo []byte
 
 type KeyValuePair struct {
 	_struct bool        `codec:",toarray"`
-	Key     HexKey      `codec:"key"`
+	Key     Hash `codec:"key"`
 	Value   interface{} `codec:"value"`
 }
 
@@ -23,4 +25,3 @@ type Node struct {
 }
 
 type Level uint
-type Hash []byte

@@ -1,6 +1,6 @@
 package merkleTree
 
-func (h HexKey) Len() int {
+func (h Hash) Len() int {
 	ret := len(h)
 	for _, c := range h {
 		if c == 0 {
@@ -10,7 +10,7 @@ func (h HexKey) Len() int {
 	return ret
 }
 
-func (h HexKey) cmp(h2 HexKey) int {
+func (h Hash) cmp(h2 Hash) int {
 	if h.Len() < h2.Len() {
 		return -1
 	}
@@ -30,10 +30,10 @@ func (h HexKey) cmp(h2 HexKey) int {
 	return 0
 }
 
-func (h HexKey) Less(h2 HexKey) bool {
+func (h Hash) Less(h2 Hash) bool {
 	return h.cmp(h2) < 0
 }
 
-func (h HexKey) Eq(h2 HexKey) bool {
+func (h Hash) Eq(h2 Hash) bool {
 	return h.cmp(h2) == 0
 }
