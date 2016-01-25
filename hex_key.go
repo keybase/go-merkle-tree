@@ -10,22 +10,30 @@ func (h HexKey) Len() int {
 	return ret
 }
 
-func (h HexKey) Less(h2 HexKey) bool {
+func (h HexKey) cmp(h2 HexKey) int {
 	if h.Len() < h2.Len() {
-		return true
+		return -1
 	}
 	if h.Len() > h2.Len() {
-		return false
+		return 1
 	}
 	for i, b := range h {
 		b2 := h2[i]
 		if b < b2 {
-			return true
+			return -1
 		}
 		if b > b2 {
-			return false
+			return 1
 		}
 	}
 	// Equal in this case
-	return false
+	return 0
+}
+
+func (h HexKey) Less(h2 HexKey) bool {
+	return h.cmp(h2) < 0
+}
+
+func (h HexKey) Eq(h2 HexKey) bool {
+	return h.cmp(h2) == 0
 }

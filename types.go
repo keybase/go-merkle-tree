@@ -17,7 +17,10 @@ const (
 )
 
 type Node struct {
-	PrevRoot []byte         `codec:"prev_root,omitempty"`
+	PrevRoot Hash           `codec:"prev_root,omitempty"`
 	Tab      []KeyValuePair `codec:"tab"`
 	Type     NodeType       `codec:"type"`
 }
+
+type Level uint
+type Hash []byte
