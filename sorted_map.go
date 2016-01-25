@@ -73,6 +73,15 @@ func (s *SortedMap) binarySearch(k Hash) (ret int, eq bool) {
 	return ret, eq
 }
 
+func (s *SortedMap) find(k Hash) *KeyValuePair {
+	i, eq := s.binarySearch(k)
+	if !eq {
+		return nil
+	}
+	ret := s.at(ChildIndex(i))
+	return &ret
+}
+
 func (s *SortedMap) replace(kvp KeyValuePair) *SortedMap {
 	if len(s.list) > 0 {
 		i, eq := s.binarySearch(kvp.Key)

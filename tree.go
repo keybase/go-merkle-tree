@@ -74,3 +74,61 @@ func (t *Tree) simpleInsert(l Level, sm *SortedMap, prevRoot Hash) (ret Hash, er
 	}
 	return ret, err
 }
+
+func (t *Tree) verifyNode(h Hash, node *Node) (err error) {
+	var b []byte
+	if b, err = encodeToBytes(node); err != nil {
+		return err
+	}
+	h2 := t.eng.Hash(b)
+	if !h.Eq(h2) {
+		err = HashMismatchError{H: h}
+	}
+	return err
+}
+
+func (t *Tree) find(h Hash, skipVerify bool) (kvp *KeyValuePair, root Hash, err error) {
+	t.RLock()
+	defer t.RUnlock()
+
+	root, err = t.eng.LookupRoot()
+	if err != nil {
+		return nil, nil, err
+	}
+	curr := root
+	var level Level
+	for curr != nil {
+		var node *Node
+		node, err = t.eng.LookupNode(curr)
+		if node == nil || err == nil {
+			err = NodeNotFoundError{H: curr}
+		}
+		if err != nil {
+			return nil, nil, err
+		}
+		if !skipVerify {
+			if err = t.verifyNode(curr, node); err != nil {
+				return nil, nil, err
+			}
+		}
+		sm := NewSortedMapFromList(node.Tab)
+		kvp = sm.find(h)
+		if node.Type == NodeTypeLeaf {
+			curr = nil
+		} else if kvp == nil {
+			curr = nil
+		} else {
+			curr = t.cfg.prefixThroughLevel(level, kvp.Key).ToHash()
+		}
+		level++
+	}
+	return kvp, root, err
+}
+
+func (t *Tree) Find(h Hash) (kvp *KeyValuePair, root Hash, err error) {
+	return t.find(h, false)
+}
+
+func (t *Tree) FindUnsafe(h Hash) (kvp *KeyValuePair, root Hash, err error) {
+	return t.find(h, true)
+}
