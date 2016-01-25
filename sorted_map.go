@@ -8,6 +8,10 @@ type SortedMap struct {
 	list []KeyValuePair
 }
 
+func NewSortedMap() *SortedMap {
+	return &SortedMap{}
+}
+
 func NewSortedMapFromSortedList(l []KeyValuePair) *SortedMap {
 	return &SortedMap{list: l}
 }
@@ -84,4 +88,16 @@ func (s *SortedMap) replace(kvp KeyValuePair) *SortedMap {
 		s.list = []KeyValuePair{kvp}
 	}
 	return s
+}
+
+func (s *SortedMap) Len() ChildIndex {
+	return ChildIndex(len(s.list))
+}
+
+func (s *SortedMap) at(i ChildIndex) KeyValuePair {
+	return s.list[i]
+}
+
+func (s *SortedMap) slice(begin, end ChildIndex) *SortedMap {
+	return NewSortedMapFromList(s.list[begin:end])
 }

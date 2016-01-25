@@ -1,8 +1,8 @@
 package merkleTree
 
 type Hash []byte
-
 type TxInfo []byte
+type Prefix []byte
 
 type KeyValuePair struct {
 	_struct bool        `codec:",toarray"`
@@ -25,3 +25,8 @@ type Node struct {
 }
 
 type Level uint
+type ChildIndex uint32
+
+func (l Level) ToChildIndex() ChildIndex { return ChildIndex(l) }
+func (p Prefix) Eq(p2 Prefix) bool       { return Hash(p).Eq(Hash(p2)) }
+func (p Prefix) ToHash() Hash            { return Hash(p) }
