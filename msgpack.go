@@ -1,6 +1,7 @@
 package merkleTree
 
 import (
+	"bytes"
 	"github.com/ugorji/go/codec"
 )
 
@@ -18,4 +19,13 @@ func encodeToBytes(i interface{}) ([]byte, error) {
 
 func decodeFromBytes(p interface{}, b []byte) error {
 	return codec.NewDecoderBytes(b, codecHandle()).Decode(p)
+}
+
+func deepEqual(i1, i2 interface{}) bool {
+	b1, e1 := encodeToBytes(i1)
+	b2, e2 := encodeToBytes(i2)
+	if e1 != nil || e2 != nil {
+		return false
+	}
+	return bytes.Equal(b1, b2)
 }

@@ -148,12 +148,17 @@ type step struct {
 	l Level
 }
 
-type path struct {
-	steps []step
-}
+type path struct{ steps []step }
 
-func (p *path) push(s step) {
-	p.steps = append(p.steps, s)
+func (p *path) push(s step) { p.steps = append(p.steps, s) }
+func (p path) len() Level   { return Level(len(p.steps)) }
+
+func (p *path) reverse() {
+	j := len(p.steps) - 1
+	for i := 0; i < j; i++ {
+		p.steps[i], p.steps[j] = p.steps[j], p.steps[i]
+		j--
+	}
 }
 
 func (t *Tree) Upsert(kvp KeyValuePair, txinfo TxInfo) (err error) {
@@ -165,8 +170,8 @@ func (t *Tree) Upsert(kvp KeyValuePair, txinfo TxInfo) (err error) {
 		return err
 	}
 
-	// prevRoot := root
-	// var last *Node
+	prevRoot := root
+	var last *Node
 
 	var path path
 	var level Level
@@ -176,11 +181,16 @@ func (t *Tree) Upsert(kvp KeyValuePair, txinfo TxInfo) (err error) {
 		return err
 	}
 
+	// Find the path from the key up to the root;
+	// find by walking down from the root.
 	for curr != nil {
 		prefix := t.cfg.prefixThroughLevel(level, kvp.Key)
 		path.push(step{p: prefix, n: curr, l: level})
 		level++
-		// last = curr
+		last = curr
+		if curr.Type == NodeTypeLeaf {
+			break
+		}
 		nxt, err := curr.findChildByPrefix(prefix)
 		if err != nil {
 			return err
@@ -193,5 +203,26 @@ func (t *Tree) Upsert(kvp KeyValuePair, txinfo TxInfo) (err error) {
 			return err
 		}
 	}
-	return err
+
+	// Figure out what to store at the node where we stopped going down the path.
+	var sm *SortedMap
+	if last == nil || last.Type == NodeTypeINode {
+		sm = NewSortedMapFromKeyAndValue(kvp)
+		level = 0
+	} else if val2 := last.findValueInLeaf(kvp.Key); val2 == nil || !deepEqual(val2, kvp.Value) {
+		sm = newSortedMapFromNode(last).replace(kvp)
+		level = path.len() - 1
+	} else {
+		return nil
+	}
+
+	// Make a new subtree out of our new node.
+	_, err = t.hashTreeRecursive(level, sm, prevRoot)
+	if err != nil {
+		return err
+	}
+
+	path.reverse()
+
+	return nil
 }
