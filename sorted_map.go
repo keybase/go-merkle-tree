@@ -16,6 +16,10 @@ func NewSortedMapFromSortedList(l []KeyValuePair) *SortedMap {
 	return &SortedMap{list: l}
 }
 
+func newSortedMapFromNode(n *Node) *SortedMap {
+	return NewSortedMapFromSortedList(n.Tab)
+}
+
 func NewSortedMapFromList(l []KeyValuePair) *SortedMap {
 	ret := NewSortedMapFromSortedList(l)
 	ret.sort()
@@ -109,4 +113,24 @@ func (s *SortedMap) at(i ChildIndex) KeyValuePair {
 
 func (s *SortedMap) slice(begin, end ChildIndex) *SortedMap {
 	return NewSortedMapFromList(s.list[begin:end])
+}
+
+func (n *Node) findValueInLeaf(h Hash) interface{} {
+	kvp := newSortedMapFromNode(n).find(h)
+	if kvp == nil {
+		return nil
+	}
+	return kvp.Value
+}
+
+func (n *Node) findChildByPrefix(p Prefix) (Hash, error) {
+	kvp := newSortedMapFromNode(n).find(Hash(p))
+	if kvp == nil {
+		return nil, nil
+	}
+	b, ok := (kvp.Value).([]byte)
+	if !ok {
+		return nil, BadChildPointerError{kvp.Value}
+	}
+	return Hash(b), nil
 }

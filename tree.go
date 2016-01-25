@@ -87,7 +87,18 @@ func (t *Tree) verifyNode(h Hash, node *Node) (err error) {
 	return err
 }
 
-func (t *Tree) find(h Hash, skipVerify bool) (kvp *KeyValuePair, root Hash, err error) {
+func (t *Tree) lookupNode(h Hash) (*Node, error) {
+	node, err := t.eng.LookupNode(h)
+	if node == nil || err == nil {
+		err = NodeNotFoundError{H: h}
+	}
+	if err != nil {
+		return nil, err
+	}
+	return node, err
+}
+
+func (t *Tree) find(h Hash, skipVerify bool) (ret interface{}, root Hash, err error) {
 	t.RLock()
 	defer t.RUnlock()
 
@@ -99,10 +110,7 @@ func (t *Tree) find(h Hash, skipVerify bool) (kvp *KeyValuePair, root Hash, err 
 	var level Level
 	for curr != nil {
 		var node *Node
-		node, err = t.eng.LookupNode(curr)
-		if node == nil || err == nil {
-			err = NodeNotFoundError{H: curr}
-		}
+		node, err = t.lookupNode(curr)
 		if err != nil {
 			return nil, nil, err
 		}
@@ -111,24 +119,79 @@ func (t *Tree) find(h Hash, skipVerify bool) (kvp *KeyValuePair, root Hash, err 
 				return nil, nil, err
 			}
 		}
-		sm := NewSortedMapFromList(node.Tab)
-		kvp = sm.find(h)
+
 		if node.Type == NodeTypeLeaf {
-			curr = nil
-		} else if kvp == nil {
-			curr = nil
-		} else {
-			curr = t.cfg.prefixThroughLevel(level, kvp.Key).ToHash()
+			ret = node.findValueInLeaf(h)
+			break
+		}
+		prfx := t.cfg.prefixThroughLevel(level, h)
+		curr, err = node.findChildByPrefix(prfx)
+		if err != nil {
+			return nil, nil, err
 		}
 		level++
 	}
-	return kvp, root, err
+	return ret, root, err
 }
 
-func (t *Tree) Find(h Hash) (kvp *KeyValuePair, root Hash, err error) {
+func (t *Tree) Find(h Hash) (ret interface{}, root Hash, err error) {
 	return t.find(h, false)
 }
 
-func (t *Tree) FindUnsafe(h Hash) (kvp *KeyValuePair, root Hash, err error) {
+func (t *Tree) FindUnsafe(h Hash) (ret interface{}, root Hash, err error) {
 	return t.find(h, true)
+}
+
+type step struct {
+	p Prefix
+	n *Node
+	l Level
+}
+
+type path struct {
+	steps []step
+}
+
+func (p *path) push(s step) {
+	p.steps = append(p.steps, s)
+}
+
+func (t *Tree) Upsert(kvp KeyValuePair, txinfo TxInfo) (err error) {
+	t.Lock()
+	defer t.Unlock()
+
+	root, err := t.eng.LookupRoot()
+	if err != nil {
+		return err
+	}
+
+	// prevRoot := root
+	// var last *Node
+
+	var path path
+	var level Level
+
+	curr, err := t.lookupNode(root)
+	if err != nil {
+		return err
+	}
+
+	for curr != nil {
+		prefix := t.cfg.prefixThroughLevel(level, kvp.Key)
+		path.push(step{p: prefix, n: curr, l: level})
+		level++
+		// last = curr
+		nxt, err := curr.findChildByPrefix(prefix)
+		if err != nil {
+			return err
+		}
+		if nxt == nil {
+			break
+		}
+		curr, err = t.lookupNode(nxt)
+		if err != nil {
+			return err
+		}
+	}
+	return err
 }
