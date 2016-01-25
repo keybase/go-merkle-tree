@@ -6,7 +6,7 @@ type TxInfo []byte
 
 type KeyValuePair struct {
 	_struct bool        `codec:",toarray"`
-	Key     Hash `codec:"key"`
+	Key     Hash        `codec:"key"`
 	Value   interface{} `codec:"value"`
 }
 
