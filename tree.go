@@ -41,7 +41,9 @@ func (t *Tree) Build(sm *SortedMap, txi TxInfo) (err error) {
 func (t *Tree) hashTreeRecursive(level Level, sm *SortedMap, prevRoot Hash) (ret Hash, err error) {
 	fmt.Printf("HTR A %d\n", level)
 	if sm.Len() <= t.cfg.n {
-		return t.simpleInsert(level, sm, prevRoot)
+		ret, err = t.simpleInsert(level, sm, prevRoot)
+		fmt.Printf("HTR SS %d -> %v\n", level, err)
+		return ret, err
 	}
 	fmt.Printf("HTR B %d\n", level)
 
@@ -54,10 +56,11 @@ func (t *Tree) hashTreeRecursive(level Level, sm *SortedMap, prevRoot Hash) (ret
 		prefix := t.cfg.formatPrefix(i)
 		start := j
 		fmt.Printf("> %d %x %x %+v\n", nsm.Len(), t.cfg.prefixAtLevel(level, sm.at(j).Key), prefix, sm.at(j))
-		for j < nsm.Len() && t.cfg.prefixAtLevel(level, sm.at(j).Key).Eq(prefix) {
+		for j < sm.Len() && t.cfg.prefixAtLevel(level, sm.at(j).Key).Eq(prefix) {
 			j++
 		}
 		end := j
+		fmt.Printf(">> j=%d start=%d end=%d\n", j, start, end)
 		if start < end {
 			sublist := sm.slice(start, end)
 			ret, err = t.hashTreeRecursive(level+1, sublist, nil)
@@ -76,6 +79,7 @@ func (t *Tree) hashTreeRecursive(level Level, sm *SortedMap, prevRoot Hash) (ret
 		return nil, err
 	}
 	err = t.eng.StoreNode(ret, node, nodeExported)
+	fmt.Printf("HTR F %d %v\n", level, err)
 	return ret, err
 
 }
