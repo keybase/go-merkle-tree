@@ -67,7 +67,7 @@ func (t *Tree) hashTreeRecursive(level Level, sm *SortedMap, prevRoot Hash) (ret
 			if err != nil {
 				return nil, err
 			}
-			prefix := t.cfg.prefixThroughLevel(level, sublist.at(0).Key)
+			prefix := t.cfg.prefixAtLevel(level, sublist.at(0).Key)
 			nsm.push(KeyValuePair{Key: prefix.ToHash(), Value: ret})
 		}
 	}
@@ -147,7 +147,7 @@ func (t *Tree) find(h Hash, skipVerify bool) (ret interface{}, root Hash, err er
 			ret = node.findValueInLeaf(h)
 			break
 		}
-		prfx := t.cfg.prefixThroughLevel(level, h)
+		prfx := t.cfg.prefixAtLevel(level, h)
 		curr, err = node.findChildByPrefix(prfx)
 		if err != nil {
 			return nil, nil, err
@@ -207,7 +207,7 @@ func (t *Tree) Upsert(kvp KeyValuePair, txinfo TxInfo) (err error) {
 	// Find the path from the key up to the root;
 	// find by walking down from the root.
 	for curr != nil {
-		prefix := t.cfg.prefixThroughLevel(level, kvp.Key)
+		prefix := t.cfg.prefixAtLevel(level, kvp.Key)
 		path.push(step{p: prefix, n: curr, l: level})
 		level++
 		last = curr
