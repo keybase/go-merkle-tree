@@ -33,7 +33,7 @@ func log256(y ChildIndex) ChildIndex {
 }
 
 func NewConfig(H Hasher, M ChildIndex, N ChildIndex) Config {
-	return Config{Hasher : H, M: M, N: N, C: log256(M)}
+	return Config{Hasher: H, M: M, N: N, C: log256(M)}
 }
 
 func (c Config) prefixAtLevel(level Level, h Hash) Prefix {
