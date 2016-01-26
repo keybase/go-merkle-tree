@@ -65,7 +65,7 @@ func (t *Tree) hashTreeRecursive(level Level, sm *SortedMap, prevRoot Hash) (ret
 	}
 	var node Node
 	var nodeExported []byte
-	if ret, node, nodeExported, err = nsm.exportToNode(t.eng, NodeTypeINode, prevRoot, level); err != nil {
+	if ret, node, nodeExported, err = nsm.exportToNode(t.cfg.Hasher, NodeTypeINode, prevRoot, level); err != nil {
 		return nil, err
 	}
 	err = t.eng.StoreNode(ret, node, nodeExported)
@@ -76,7 +76,7 @@ func (t *Tree) hashTreeRecursive(level Level, sm *SortedMap, prevRoot Hash) (ret
 func (t *Tree) simpleInsert(l Level, sm *SortedMap, prevRoot Hash) (ret Hash, err error) {
 	var node Node
 	var nodeExported []byte
-	if ret, node, nodeExported, err = sm.exportToNode(t.eng, NodeTypeLeaf, prevRoot, l); err != nil {
+	if ret, node, nodeExported, err = sm.exportToNode(t.cfg.Hasher, NodeTypeLeaf, prevRoot, l); err != nil {
 		return nil, err
 	}
 	if err = t.eng.StoreNode(ret, node, nodeExported); err != nil {
@@ -90,7 +90,7 @@ func (t *Tree) verifyNode(h Hash, node *Node) (err error) {
 	if b, err = encodeToBytes(node); err != nil {
 		return err
 	}
-	h2 := t.eng.Hash(b)
+	h2 := t.cfg.Hasher.Hash(b)
 	if !h.Eq(h2) {
 		err = HashMismatchError{H: h}
 	}
@@ -241,7 +241,7 @@ func (t *Tree) Upsert(kvp KeyValuePair, txinfo TxInfo) (err error) {
 		sm := newSortedMapFromNode(step.n).replace(KeyValuePair{Key: step.p.ToHash(), Value: hsh})
 		var node Node
 		var nodeExported []byte
-		hsh, node, nodeExported, err = sm.exportToNode(t.eng, NodeTypeINode, prevRoot, step.l)
+		hsh, node, nodeExported, err = sm.exportToNode(t.cfg.Hasher, NodeTypeINode, prevRoot, step.l)
 		if err != nil {
 			return err
 		}

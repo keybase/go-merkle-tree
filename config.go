@@ -4,7 +4,14 @@ import (
 	"encoding/binary"
 )
 
+type Hasher interface {
+	Hash([]byte) Hash
+}
+
 type Config struct {
+	// A hasher is used to compute hashes in this configuration
+	Hasher Hasher
+
 	// The number of children per node
 	M ChildIndex
 
@@ -25,8 +32,8 @@ func log256(y ChildIndex) ChildIndex {
 	return ret
 }
 
-func NewConfig(M, N ChildIndex) Config {
-	return Config{M: M, N: N, C: log256(M)}
+func NewConfig(H Hasher, M ChildIndex, N ChildIndex) Config {
+	return Config{Hasher : H, M: M, N: N, C: log256(M)}
 }
 
 func (c Config) prefixAtLevel(level Level, h Hash) Prefix {
