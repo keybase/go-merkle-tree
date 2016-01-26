@@ -1,6 +1,7 @@
 package merkleTree
 
 import (
+	"fmt"
 	"encoding/binary"
 )
 
@@ -46,8 +47,7 @@ func div8roundUp(i ChildIndex) ChildIndex {
 
 func bitslice(b []byte, start ChildIndex, end ChildIndex) Prefix {
 	tot := end - start
-
-	startBits := start & 0x7
+	bitrem := tot & 0x7
 
 	// Shift off the first start/8 bytes
 	b = b[(start >> 3):]
@@ -56,12 +56,17 @@ func bitslice(b []byte, start ChildIndex, end ChildIndex) Prefix {
 
 	out := make([]byte, len(b))
 
-	// shift all the bits over
-	carry := byte(0)
-	for i := len(b) - 1; i >= 0; i-- {
-		nxtCarry := (b[i] & (0xff << startBits))
-		out[i] = (b[i] << startBits) | carry
-		carry = nxtCarry
+	if bitrem > 0 {
+		fmt.Printf("pree -> %d %v\n", bitrem, b)
+		carry := byte(0)
+		for i := len(b) - 1; i >= 0; i-- {
+			nxtCarry := (b[i] & (0xff << (8 - bitrem)))
+			out[i] = (b[i] >> (8 - bitrem)) | carry
+			carry = nxtCarry
+		}
+		fmt.Printf("post -> %v\n", out)
+	} else {
+		copy(out, b)
 	}
 
 	return Prefix(out)
