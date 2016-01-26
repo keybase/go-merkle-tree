@@ -50,6 +50,14 @@ func (of *objFactory) produce() KeyValuePair {
 	return kvp
 }
 
+func (of *objFactory) mproduce(n int) []KeyValuePair {
+	var ret []KeyValuePair
+	for i := 0; i < n; i++ {
+		ret = append(ret, of.produce())
+	}
+	return ret
+}
+
 func (of *objFactory) modifySome(mod int) {
 	i := 0
 	for _, v := range of.objs {

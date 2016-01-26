@@ -11,6 +11,12 @@ type MemEngine struct {
 	nodes map[string](*Node)
 }
 
+func NewMemEngine() *MemEngine {
+	return &MemEngine{
+		nodes : make(map[string](*Node)),
+	}
+}
+
 var _ Engine = (*MemEngine)(nil)
 
 // CommitRoot "commits" the root ot the blessed memory slot
