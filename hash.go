@@ -1,5 +1,7 @@
 package merkleTree
 
+// Len returns the number of bytes in the hash, but after shifting off
+// leading 0s from the length size of the hash
 func (h Hash) Len() int {
 	ret := len(h)
 	for _, c := range h {
@@ -30,10 +32,13 @@ func (h Hash) cmp(h2 Hash) int {
 	return 0
 }
 
+// Less determines if the receiver is less than the arg, after shifting off all
+// leading 0 bytes and using big-endian byte ordering.
 func (h Hash) Less(h2 Hash) bool {
 	return h.cmp(h2) < 0
 }
 
+// Eq determines if the two hashes are equal.
 func (h Hash) Eq(h2 Hash) bool {
 	return h.cmp(h2) == 0
 }

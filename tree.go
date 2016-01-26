@@ -4,15 +4,25 @@ import (
 	"sync"
 )
 
+// Tree is the MerkleTree class; it needs an engine and a configuration
+// to run
 type Tree struct {
 	sync.RWMutex
 	eng Engine
 	cfg Config
 }
 
+// NewTree makes a new tree
+func NewTree(e Engine, c Config) *Tree {
+	return &Tree{eng: e, cfg: c}
+}
+
+// Build a tree from scratch, taking a batch input. Provide the
+// batch import (it should be sorted), and also an optional TxInfo
 func (t *Tree) Build(sm *SortedMap, txi TxInfo) (err error) {
 	t.Lock()
 	defer t.Unlock()
+
 	var prevRoot, nextRoot Hash
 	if prevRoot, err = t.eng.LookupRoot(); err != nil {
 		return err
