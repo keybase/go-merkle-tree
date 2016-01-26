@@ -1,6 +1,7 @@
 package merkleTree
 
 import (
+	"fmt"
 	"sync"
 )
 
@@ -38,22 +39,26 @@ func (t *Tree) Build(sm *SortedMap, txi TxInfo) (err error) {
 }
 
 func (t *Tree) hashTreeRecursive(level Level, sm *SortedMap, prevRoot Hash) (ret Hash, err error) {
-	if sm.Len() <= t.cfg.N {
+	fmt.Printf("HTR A %d\n", level)
+	if sm.Len() <= t.cfg.n {
 		return t.simpleInsert(level, sm, prevRoot)
 	}
+	fmt.Printf("HTR B %d\n", level)
 
-	M := t.cfg.M // the number of children we have
+	m := t.cfg.m // the number of children we have
 	var j ChildIndex
 	nsm := NewSortedMap() // new sorted map
 
-	for i := ChildIndex(0); i < M; i++ {
+	for i := ChildIndex(0); i < m; i++ {
+		fmt.Printf("HTR C %d\n", level)
 		prefix := t.cfg.formatPrefix(i)
 		start := j
+		fmt.Printf("> %d %x %x\n", nsm.Len(), t.cfg.prefixAtLevel(level, sm.at(j).Key), prefix)
 		for j < nsm.Len() && t.cfg.prefixAtLevel(level, sm.at(j).Key).Eq(prefix) {
 			j++
 		}
 		end := j
-		if end > start {
+		if start < end {
 			sublist := sm.slice(start, end)
 			ret, err = t.hashTreeRecursive(level+1, sublist, nil)
 			if err != nil {
@@ -65,7 +70,9 @@ func (t *Tree) hashTreeRecursive(level Level, sm *SortedMap, prevRoot Hash) (ret
 	}
 	var node Node
 	var nodeExported []byte
-	if ret, node, nodeExported, err = nsm.exportToNode(t.cfg.Hasher, NodeTypeINode, prevRoot, level); err != nil {
+	fmt.Printf("HTR D %d\n", level)
+	if ret, node, nodeExported, err = nsm.exportToNode(t.cfg.hasher, NodeTypeINode, prevRoot, level); err != nil {
+		fmt.Printf("HTR E %d\n", level)
 		return nil, err
 	}
 	err = t.eng.StoreNode(ret, node, nodeExported)
@@ -76,7 +83,7 @@ func (t *Tree) hashTreeRecursive(level Level, sm *SortedMap, prevRoot Hash) (ret
 func (t *Tree) simpleInsert(l Level, sm *SortedMap, prevRoot Hash) (ret Hash, err error) {
 	var node Node
 	var nodeExported []byte
-	if ret, node, nodeExported, err = sm.exportToNode(t.cfg.Hasher, NodeTypeLeaf, prevRoot, l); err != nil {
+	if ret, node, nodeExported, err = sm.exportToNode(t.cfg.hasher, NodeTypeLeaf, prevRoot, l); err != nil {
 		return nil, err
 	}
 	if err = t.eng.StoreNode(ret, node, nodeExported); err != nil {
@@ -90,7 +97,7 @@ func (t *Tree) verifyNode(h Hash, node *Node) (err error) {
 	if b, err = encodeToBytes(node); err != nil {
 		return err
 	}
-	h2 := t.cfg.Hasher.Hash(b)
+	h2 := t.cfg.hasher.Hash(b)
 	if !h.Eq(h2) {
 		err = HashMismatchError{H: h}
 	}
@@ -119,8 +126,10 @@ func (t *Tree) find(h Hash, skipVerify bool) (ret interface{}, root Hash, err er
 	curr := root
 	var level Level
 	for curr != nil {
+		fmt.Printf("Looking up curr=%x\n", root)
 		var node *Node
 		node, err = t.lookupNode(curr)
+		fmt.Printf("Result -> (%+v, %v)", node, err)
 		if err != nil {
 			return nil, nil, err
 		}
@@ -241,7 +250,7 @@ func (t *Tree) Upsert(kvp KeyValuePair, txinfo TxInfo) (err error) {
 		sm := newSortedMapFromNode(step.n).replace(KeyValuePair{Key: step.p.ToHash(), Value: hsh})
 		var node Node
 		var nodeExported []byte
-		hsh, node, nodeExported, err = sm.exportToNode(t.cfg.Hasher, NodeTypeINode, prevRoot, step.l)
+		hsh, node, nodeExported, err = sm.exportToNode(t.cfg.hasher, NodeTypeINode, prevRoot, step.l)
 		if err != nil {
 			return err
 		}

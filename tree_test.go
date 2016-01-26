@@ -1,9 +1,8 @@
-
 package merkleTree
 
-import(
-	"testing"
+import (
 	"crypto/sha512"
+	"testing"
 )
 
 type sha512Hasher struct{}
@@ -14,11 +13,7 @@ func (s sha512Hasher) Hash(b []byte) Hash {
 }
 
 func makeConfig() Config {
-	return Config{
-		Hasher : sha512Hasher{},
-		N : 4,
-		M : 16,
-	}
+	return NewConfig(sha512Hasher{}, 4, 16)
 }
 
 func newMemTree() (t *Tree, m *MemEngine) {
@@ -38,7 +33,6 @@ func TestSimpleBuild(t *testing.T) {
 	findAll(t, tree, objs)
 }
 
-
 func findAll(t *testing.T, tree *Tree, objs []KeyValuePair) {
 	for i, kvp := range objs {
 		v, _, err := tree.Find(kvp.Key)
@@ -46,7 +40,7 @@ func findAll(t *testing.T, tree *Tree, objs []KeyValuePair) {
 			t.Fatalf("Find for obj %d yielded an error: %v", i, err)
 		}
 		if v == nil {
-			t.Fatalf("Find for obj %i with key %v returned no results", i,kvp.Key)
+			t.Fatalf("Find for obj %i with key %v returned no results", i, kvp.Key)
 		}
 		if !deepEqual(v, kvp.Value) {
 			t.Fatalf("Didn't get object equality for %d: %+v != %+v", v, kvp.Value)

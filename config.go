@@ -10,17 +10,17 @@ type Hasher interface {
 
 type Config struct {
 	// A hasher is used to compute hashes in this configuration
-	Hasher Hasher
+	hasher Hasher
 
 	// The number of children per node
-	M ChildIndex
+	m ChildIndex
 
 	// The maximum number of leaves before we split
-	N ChildIndex
+	n ChildIndex
 
 	// If we have M children per node, how many binary chars does it
 	// take to represent it?
-	C ChildIndex
+	c ChildIndex
 }
 
 func log256(y ChildIndex) ChildIndex {
@@ -32,22 +32,22 @@ func log256(y ChildIndex) ChildIndex {
 	return ret
 }
 
-func NewConfig(H Hasher, M ChildIndex, N ChildIndex) Config {
-	return Config{Hasher: H, M: M, N: N, C: log256(M)}
+func NewConfig(h Hasher, m ChildIndex, n ChildIndex) Config {
+	return Config{hasher: h, m: m, n: n, c: log256(m)}
 }
 
 func (c Config) prefixAtLevel(level Level, h Hash) Prefix {
 	l := level.ToChildIndex()
-	return Prefix(h[(l * c.C):((l + 1) * c.C)])
+	return Prefix(h[(l * c.c):((l + 1) * c.c)])
 }
 
 func (c Config) prefixThroughLevel(level Level, h Hash) Prefix {
 	l := level.ToChildIndex()
-	return Prefix(h[0:((l + 1) * c.C)])
+	return Prefix(h[0:((l + 1) * c.c)])
 }
 
 func (c Config) formatPrefix(index ChildIndex) Prefix {
 	ret := make([]byte, 4)
 	binary.BigEndian.PutUint32(ret, uint32(index))
-	return Prefix(ret)
+	return Prefix(ret[(4 - c.c):])
 }
