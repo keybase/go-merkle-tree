@@ -217,12 +217,30 @@ func (t *Tree) Upsert(kvp KeyValuePair, txinfo TxInfo) (err error) {
 	}
 
 	// Make a new subtree out of our new node.
-	_, err = t.hashTreeRecursive(level, sm, prevRoot)
+	hsh, err := t.hashTreeRecursive(level, sm, prevRoot)
 	if err != nil {
 		return err
 	}
 
 	path.reverse()
 
-	return nil
+	for _, step := range path.steps {
+		if step.n.Type != NodeTypeINode {
+			continue
+		}
+		sm := newSortedMapFromNode(step.n).replace(KeyValuePair{Key: step.p.ToHash(), Value: hsh})
+		var node Node
+		var nodeExported []byte
+		hsh, node, nodeExported, err = sm.exportToNode(t.eng, NodeTypeINode, prevRoot, step.l)
+		if err != nil {
+			return err
+		}
+		err = t.eng.StoreNode(hsh, node, nodeExported)
+		if err != nil {
+			return err
+		}
+	}
+	err = t.eng.CommitRoot(prevRoot, hsh, txinfo)
+
+	return err
 }
