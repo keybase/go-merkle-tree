@@ -1,8 +1,8 @@
 package merkleTree
 
 import (
-	"fmt"
 	"encoding/binary"
+	"fmt"
 )
 
 type Hasher interface {
@@ -45,28 +45,37 @@ func div8roundUp(i ChildIndex) ChildIndex {
 	return ((i + 7) >> 3)
 }
 
+func rightShift(b []byte, n uint) {
+	carry := byte(0)
+	for i := 0; i < len(b); i++ {
+		nxtCarry := b[i] & ((1 << n) - 1)
+		b[i] = (b[i] >> n) | (carry << (8 - n))
+		carry = nxtCarry
+	}
+}
+
 func bitslice(b []byte, start ChildIndex, end ChildIndex) Prefix {
 	tot := end - start
-	bitrem := tot & 0x7
 
 	// Shift off the first start/8 bytes
 	b = b[(start >> 3):]
 	// Clamp off all bytes after tot/8
 	b = b[0:div8roundUp(tot)]
 
+	// Output vector
 	out := make([]byte, len(b))
+	copy(out, b)
 
-	if bitrem > 0 {
-		fmt.Printf("pree -> %d %v\n", bitrem, b)
-		carry := byte(0)
-		for i := len(b) - 1; i >= 0; i-- {
-			nxtCarry := (b[i] & (0xff << (8 - bitrem)))
-			out[i] = (b[i] >> (8 - bitrem)) | carry
-			carry = nxtCarry
-		}
-		fmt.Printf("post -> %v\n", out)
-	} else {
-		copy(out, b)
+	startrem := start & 0x7
+	if startrem > 0 && len(out) > 0 {
+		fmt.Printf("pre LSH %v %d %d\n", out, (8 - startrem), (1 << (8 - startrem)))
+		out[0] = out[0] & ((1 << (8 - startrem)) - 1)
+		fmt.Printf("post LSH %v\n", out)
+	}
+
+	// We might have to shift the whole buffer over rsh bytes
+	if rsh := (end & 0x7); rsh > 0 {
+		rightShift(out, uint(8-rsh))
 	}
 
 	return Prefix(out)

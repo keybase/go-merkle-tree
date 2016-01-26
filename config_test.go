@@ -1,22 +1,21 @@
-
 package merkleTree
 
 import (
-	"testing"
-	"math/big"
 	"bytes"
 	"crypto/rand"
+	"math/big"
+	"testing"
 )
 
 func slowBitslice(b []byte, begin int, end int) []byte {
 	z := big.NewInt(0).SetBytes(b)
 	z = z.Rsh(z, uint(len(b)*8-end))
 	modulus := big.NewInt(1)
-	modulus = modulus.Lsh(modulus, uint(end - begin))
+	modulus = modulus.Lsh(modulus, uint(end-begin))
 	z = z.Mod(z, modulus)
 	ret := z.Bytes()
 
-	padlen := (end + 7 - begin)/8 - len(ret)
+	padlen := (end+7-begin)/8 - len(ret)
 	pad := make([]byte, padlen)
 	ret = append(pad, ret...)
 	return ret
