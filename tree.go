@@ -50,10 +50,10 @@ func (t *Tree) hashTreeRecursive(level Level, sm *SortedMap, prevRoot Hash) (ret
 	nsm := NewSortedMap() // new sorted map
 
 	for i := ChildIndex(0); i < m; i++ {
-		fmt.Printf("HTR C %d\n", level)
+		fmt.Printf("HTR C level=%d i=%d j=%d\n", level, i, j)
 		prefix := t.cfg.formatPrefix(i)
 		start := j
-		fmt.Printf("> %d %x %x\n", nsm.Len(), t.cfg.prefixAtLevel(level, sm.at(j).Key), prefix)
+		fmt.Printf("> %d %x %x %+v\n", nsm.Len(), t.cfg.prefixAtLevel(level, sm.at(j).Key), prefix, sm.at(j))
 		for j < nsm.Len() && t.cfg.prefixAtLevel(level, sm.at(j).Key).Eq(prefix) {
 			j++
 		}

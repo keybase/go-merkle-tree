@@ -7,6 +7,8 @@ func (h Hash) Len() int {
 	for _, c := range h {
 		if c == 0 {
 			ret--
+		} else {
+			break
 		}
 	}
 	return ret
