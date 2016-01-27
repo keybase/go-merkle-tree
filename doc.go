@@ -51,26 +51,5 @@ To construct a new Tree from scratch, you need to specify three parameters:
 
 	- An array of KeyValuePairs, the things actually stored in the Merkle tree.
 
-Example:
-
-	type sha512Hasher struct{}
-
-	func (s sha512Hasher) Hash(b []byte) Hash {
-		tmp := sha512.Sum512(b)
-		return Hash(tmp[:])
-	}
-
-	func main() {
-		cfg := NewConfig(sha512hasher{}, 256, 512);
-
-		eng := someFunctionToMakeAStorageEngine()
-		tree := NewTree(eng, cfg)
-
-		var objs []KeyValuePair
-		objs := someFunctionToGetData()
-		tree.Build(objs)
-	}
-
-
 */
 package merkleTree
