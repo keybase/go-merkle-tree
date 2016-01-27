@@ -2,7 +2,6 @@ package merkleTree
 
 import (
 	"crypto/sha512"
-	"fmt"
 	"testing"
 )
 
@@ -23,15 +22,21 @@ func newMemTree() (t *Tree, m *MemEngine) {
 	return t, m
 }
 
-func TestSimpleBuild(t *testing.T) {
+func testSimpleBuild(t *testing.T) {
 	of := newObjFactory()
 	objs := of.mproduce(1024)
 	sm := NewSortedMapFromList(objs)
-	tree, mem := newMemTree()
+	tree, _ := newMemTree()
 	if err := tree.Build(sm, nil); err != nil {
 		t.Fatalf("Error in build: %v", err)
 	}
 	findAll(t, tree, objs)
+}
+
+func TestSimpleBuild(t *testing.T) {
+	for i := 0; i < 8; i++ {
+		testSimpleBuild(t)
+	}
 }
 
 func findAll(t *testing.T, tree *Tree, objs []KeyValuePair) {

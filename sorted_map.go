@@ -128,7 +128,7 @@ func (n *Node) findChildByPrefix(p Prefix) (Hash, error) {
 	if kvp == nil {
 		return nil, nil
 	}
-	b, ok := (kvp.Value).([]byte)
+	b, ok := (kvp.Value).(Hash)
 	if !ok {
 		return nil, BadChildPointerError{kvp.Value}
 	}

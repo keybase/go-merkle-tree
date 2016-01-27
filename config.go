@@ -46,5 +46,5 @@ func div8roundUp(i ChildIndex) ChildIndex {
 func (c Config) formatPrefix(index ChildIndex) Prefix {
 	ret := make([]byte, 4)
 	binary.BigEndian.PutUint32(ret, uint32(index))
-	return Prefix(ret[(4 - c.c):])
+	return Prefix(ret[(4 - (7+c.c)/8):])
 }

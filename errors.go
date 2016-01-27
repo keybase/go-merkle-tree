@@ -25,5 +25,5 @@ type BadChildPointerError struct {
 }
 
 func (b BadChildPointerError) Error() string {
-	return fmt.Sprintf("Wanted a []byte-style child pointer; got type %T instead", b.V)
+	return fmt.Sprintf("Wanted a Hash; got type %T instead", b.V)
 }

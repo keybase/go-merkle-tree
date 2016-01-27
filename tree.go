@@ -55,8 +55,8 @@ func (t *Tree) hashTreeRecursive(level Level, sm *SortedMap, prevRoot Hash) (ret
 		fmt.Printf("HTR C level=%d i=%d j=%d\n", level, i, j)
 		prefix := t.cfg.formatPrefix(i)
 		start := j
-		fmt.Printf("> %d %x %x %+v\n", nsm.Len(), t.cfg.prefixAtLevel(level, sm.at(j).Key), prefix, sm.at(j))
 		for j < sm.Len() && t.cfg.prefixAtLevel(level, sm.at(j).Key).Eq(prefix) {
+			fmt.Printf("|> including %+v\n", sm.at(j))
 			j++
 		}
 		end := j
@@ -110,7 +110,7 @@ func (t *Tree) verifyNode(h Hash, node *Node) (err error) {
 
 func (t *Tree) lookupNode(h Hash) (*Node, error) {
 	node, err := t.eng.LookupNode(h)
-	if node == nil || err == nil {
+	if node == nil && err == nil {
 		err = NodeNotFoundError{H: h}
 	}
 	if err != nil {
