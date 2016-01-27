@@ -2,8 +2,8 @@
 // this source code is governed by the included BSD license.
 
 /*
-Generic Merkle Tree implementation, for provably publishing lots of data under
-one succinct tree root.
+Package merklTree is a generic Merkle Tree implementation, for provably publishing lots
+of data under one succinct tree root.
 
 Install:
 
