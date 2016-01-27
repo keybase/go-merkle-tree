@@ -3,7 +3,6 @@ package merkleTree
 import (
 	"crypto/sha512"
 	"encoding/hex"
-	"fmt"
 )
 
 // MemEngine is an in-memory MerkleTree engine, used now mainly for testing
@@ -45,7 +44,6 @@ func (m *MemEngine) LookupRoot() (Hash, error) {
 
 // StoreNode stores the given node under the given key.
 func (m *MemEngine) StoreNode(key Hash, val Node, _ []byte) error {
-	fmt.Printf("Store %x -> %+v\n", key, val)
 	m.nodes[hex.EncodeToString(key)] = &val
 	return nil
 }

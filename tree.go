@@ -1,7 +1,6 @@
 package merkleTree
 
 import (
-	"fmt"
 	"sync"
 )
 
@@ -39,28 +38,22 @@ func (t *Tree) Build(sm *SortedMap, txi TxInfo) (err error) {
 }
 
 func (t *Tree) hashTreeRecursive(level Level, sm *SortedMap, prevRoot Hash) (ret Hash, err error) {
-	fmt.Printf("HTR A %d\n", level)
 	if sm.Len() <= t.cfg.n {
 		ret, err = t.simpleInsert(level, sm, prevRoot)
-		fmt.Printf("HTR SS %d -> %v\n", level, err)
 		return ret, err
 	}
-	fmt.Printf("HTR B %d\n", level)
 
 	m := t.cfg.m // the number of children we have
 	var j ChildIndex
 	nsm := NewSortedMap() // new sorted map
 
 	for i := ChildIndex(0); i < m; i++ {
-		fmt.Printf("HTR C level=%d i=%d j=%d\n", level, i, j)
 		prefix := t.cfg.formatPrefix(i)
 		start := j
 		for j < sm.Len() && t.cfg.prefixAtLevel(level, sm.at(j).Key).Eq(prefix) {
-			fmt.Printf("|> including %+v\n", sm.at(j))
 			j++
 		}
 		end := j
-		fmt.Printf(">> j=%d start=%d end=%d\n", j, start, end)
 		if start < end {
 			sublist := sm.slice(start, end)
 			ret, err = t.hashTreeRecursive(level+1, sublist, nil)
@@ -73,13 +66,10 @@ func (t *Tree) hashTreeRecursive(level Level, sm *SortedMap, prevRoot Hash) (ret
 	}
 	var node Node
 	var nodeExported []byte
-	fmt.Printf("HTR D %d\n", level)
 	if ret, node, nodeExported, err = nsm.exportToNode(t.cfg.hasher, NodeTypeINode, prevRoot, level); err != nil {
-		fmt.Printf("HTR E %d\n", level)
 		return nil, err
 	}
 	err = t.eng.StoreNode(ret, node, nodeExported)
-	fmt.Printf("HTR F %d %v\n", level, err)
 	return ret, err
 
 }
@@ -130,10 +120,8 @@ func (t *Tree) find(h Hash, skipVerify bool) (ret interface{}, root Hash, err er
 	curr := root
 	var level Level
 	for curr != nil {
-		fmt.Printf("Looking up curr=%x\n", root)
 		var node *Node
 		node, err = t.lookupNode(curr)
-		fmt.Printf("Result -> (%+v, %v)", node, err)
 		if err != nil {
 			return nil, nil, err
 		}
