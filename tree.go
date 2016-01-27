@@ -66,7 +66,7 @@ func (t *Tree) hashTreeRecursive(level Level, sm *SortedMap, prevRoot Hash) (ret
 	}
 	var node Node
 	var nodeExported []byte
-	if ret, node, nodeExported, err = nsm.exportToNode(t.cfg.hasher, NodeTypeINode, prevRoot, level); err != nil {
+	if ret, node, nodeExported, err = nsm.exportToNode(t.cfg.hasher, nodeTypeINode, prevRoot, level); err != nil {
 		return nil, err
 	}
 	err = t.eng.StoreNode(ret, node, nodeExported)
@@ -77,7 +77,7 @@ func (t *Tree) hashTreeRecursive(level Level, sm *SortedMap, prevRoot Hash) (ret
 func (t *Tree) simpleInsert(l Level, sm *SortedMap, prevRoot Hash) (ret Hash, err error) {
 	var node Node
 	var nodeExported []byte
-	if ret, node, nodeExported, err = sm.exportToNode(t.cfg.hasher, NodeTypeLeaf, prevRoot, l); err != nil {
+	if ret, node, nodeExported, err = sm.exportToNode(t.cfg.hasher, nodeTypeLeaf, prevRoot, l); err != nil {
 		return nil, err
 	}
 	if err = t.eng.StoreNode(ret, node, nodeExported); err != nil {
@@ -131,7 +131,7 @@ func (t *Tree) find(h Hash, skipVerify bool) (ret interface{}, root Hash, err er
 			}
 		}
 
-		if node.Type == NodeTypeLeaf {
+		if node.Type == nodeTypeLeaf {
 			ret = node.findValueInLeaf(h)
 			break
 		}
@@ -145,11 +145,16 @@ func (t *Tree) find(h Hash, skipVerify bool) (ret interface{}, root Hash, err er
 	return ret, root, err
 }
 
+// Find the hash in the tree. Return the value stored at the leaf under
+// that hash, or nil if not found.  Return an error if there was an
+// internal problem.
 func (t *Tree) Find(h Hash) (ret interface{}, root Hash, err error) {
 	return t.find(h, false)
 }
 
-func (t *Tree) FindUnsafe(h Hash) (ret interface{}, root Hash, err error) {
+// findUnsafe shouldn't be used, since it will skip hash comparisons
+// at interior nodes.  It's mainly here for testing.
+func (t *Tree) findUnsafe(h Hash) (ret interface{}, root Hash, err error) {
 	return t.find(h, true)
 }
 
@@ -172,6 +177,9 @@ func (p *path) reverse() {
 	}
 }
 
+// Upsert inserts or updates the leaf with the given KeyValuePair
+// information.  It will associate the given transaction info
+// if specified.
 func (t *Tree) Upsert(kvp KeyValuePair, txinfo TxInfo) (err error) {
 	t.Lock()
 	defer t.Unlock()
@@ -199,7 +207,7 @@ func (t *Tree) Upsert(kvp KeyValuePair, txinfo TxInfo) (err error) {
 		path.push(step{p: prefix, n: curr, l: level})
 		level++
 		last = curr
-		if curr.Type == NodeTypeLeaf {
+		if curr.Type == nodeTypeLeaf {
 			break
 		}
 		nxt, err := curr.findChildByPrefix(prefix)
@@ -217,7 +225,7 @@ func (t *Tree) Upsert(kvp KeyValuePair, txinfo TxInfo) (err error) {
 
 	// Figure out what to store at the node where we stopped going down the path.
 	var sm *SortedMap
-	if last == nil || last.Type == NodeTypeINode {
+	if last == nil || last.Type == nodeTypeINode {
 		sm = newSortedMapFromKeyAndValue(kvp)
 		level = 0
 	} else if val2 := last.findValueInLeaf(kvp.Key); val2 == nil || !deepEqual(val2, kvp.Value) {
@@ -236,13 +244,13 @@ func (t *Tree) Upsert(kvp KeyValuePair, txinfo TxInfo) (err error) {
 	path.reverse()
 
 	for _, step := range path.steps {
-		if step.n.Type != NodeTypeINode {
+		if step.n.Type != nodeTypeINode {
 			continue
 		}
 		sm := newSortedMapFromNode(step.n).replace(KeyValuePair{Key: step.p.ToHash(), Value: hsh})
 		var node Node
 		var nodeExported []byte
-		hsh, node, nodeExported, err = sm.exportToNode(t.cfg.hasher, NodeTypeINode, prevRoot, step.l)
+		hsh, node, nodeExported, err = sm.exportToNode(t.cfg.hasher, nodeTypeINode, prevRoot, step.l)
 		if err != nil {
 			return err
 		}

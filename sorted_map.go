@@ -51,7 +51,7 @@ func (s *SortedMap) push(kp KeyValuePair) {
 	s.list = append(s.list, kp)
 }
 
-func (s *SortedMap) exportToNode(h Hasher, typ NodeType, prevRoot Hash, level Level) (hash Hash, node Node, objExported []byte, err error) {
+func (s *SortedMap) exportToNode(h Hasher, typ nodeType, prevRoot Hash, level Level) (hash Hash, node Node, objExported []byte, err error) {
 	if prevRoot != nil && level == Level(0) {
 		node.PrevRoot = prevRoot
 	}
@@ -110,6 +110,7 @@ func (s *SortedMap) replace(kvp KeyValuePair) *SortedMap {
 	return s
 }
 
+// Len returns the number of items in the Map.
 func (s *SortedMap) Len() ChildIndex {
 	return ChildIndex(len(s.list))
 }
