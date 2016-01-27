@@ -4,7 +4,6 @@ import (
 	"sort"
 )
 
-
 // SortedMap is a list of KeyValuePairs, kept in sorted order so
 // that binary search can work.
 type SortedMap struct {
