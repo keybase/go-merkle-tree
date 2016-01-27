@@ -1,6 +1,3 @@
-// Copyright 2015 Keybase, Inc. All rights reserved. Use of
-// this source code is governed by the included BSD license.
-
 /*
 Package merkleTree is a generic Merkle Tree implementation, for provably publishing lots
 of data under one succinct tree root.
@@ -21,7 +18,7 @@ the key-value pair (`0123456789abcdef`, {"name" : "max"}) in the Merkle tree.
 Let's say that the shape of the tree is to have 256 children per inode.
 Then this key-value pair might be stored under the path
 
-	at root node: 01 → aabbccdd
+	at root     node: 01 → aabbccdd
 	at aabbccdd node: 23 → eeff5588
 	at eeff5588 node: 34 → 99331122
 	at 99331122 node: 0123456789abcdef → {"name" : "max" }
@@ -44,15 +41,15 @@ Usage:
 
 To construct a new Tree from scratch, you need to specify three parameters:
 
-   	- A Config, which specifies the shape of the Tree. That is,
-      how many children per interior Node, and how big leaves
-      can get before a new level of the tree is introduced. Also,
-      the hash function to use for hashing nodes into pointers.
+	- A Config, which specifies the shape of the Tree. That is,
+	  how many children per interior Node, and how big leaves
+	  can get before a new level of the tree is introduced. Also,
+	  the hash function to use for hashing nodes into pointers.
 
-    - A StorageEngine, which determines how to load and store tree Nodes
-      from storage, and how to load and store the root hash of the Merkle tree.
+	- A StorageEngine, which determines how to load and store tree Nodes
+	  from storage, and how to load and store the root hash of the Merkle tree.
 
-    - An array of KeyValuePairs, the things actually stored in the Merkle tree.
+	- An array of KeyValuePairs, the things actually stored in the Merkle tree.
 
 Example:
 
@@ -64,8 +61,6 @@ Example:
 	}
 
 	func main() {
-		// 256 children per node; once there are 512 entries in a leaf,
-		// then split the leaf by adding more parents.
 		cfg := NewConfig(sha512hasher{}, 256, 512);
 
 		eng := someFunctionToMakeAStorageEngine()
@@ -78,5 +73,4 @@ Example:
 
 
 */
-
 package merkleTree

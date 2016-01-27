@@ -1,24 +1,16 @@
 package merkleTree
 
 import (
-	"crypto/sha512"
 	"testing"
 )
 
-type sha512Hasher struct{}
-
-func (s sha512Hasher) Hash(b []byte) Hash {
-	tmp := sha512.Sum512(b)
-	return Hash(tmp[:])
-}
-
-func makeConfig() Config {
+func makeTestConfig() Config {
 	return NewConfig(sha512Hasher{}, 4, 16)
 }
 
-func newMemTree() (t *Tree, m *MemEngine) {
+func newTestMemTree() (t *Tree, m *MemEngine) {
 	m = NewMemEngine()
-	t = NewTree(m, makeConfig())
+	t = NewTree(m, makeTestConfig())
 	return t, m
 }
 
@@ -26,13 +18,14 @@ func testSimpleBuild(t *testing.T) {
 	of := newObjFactory()
 	objs := of.mproduce(1024)
 	sm := NewSortedMapFromList(objs)
-	tree, _ := newMemTree()
+	tree, _ := newTestMemTree()
 	if err := tree.Build(sm, nil); err != nil {
 		t.Fatalf("Error in build: %v", err)
 	}
 	findAll(t, tree, objs)
 }
 
+// This example shows how to build the tree.
 func TestSimpleBuild(t *testing.T) {
 	for i := 0; i < 32; i++ {
 		testSimpleBuild(t)
