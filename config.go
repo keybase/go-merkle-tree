@@ -4,10 +4,13 @@ import (
 	"encoding/binary"
 )
 
+// Hasher is an interface for hashing MerkleTree data structures into their
+// cryptographic hashes.
 type Hasher interface {
 	Hash([]byte) Hash
 }
 
+// Config defines the shape of the MerkleTree.
 type Config struct {
 	// A hasher is used to compute hashes in this configuration
 	hasher Hasher
@@ -31,6 +34,11 @@ func log2(y ChildIndex) ChildIndex {
 	return ret
 }
 
+// NewConfig makes a new config object. Pass it a Hasher
+// (though we suggest sha512.Sum512); a parameter `m` which
+// is the number of children per interior node (we recommend 256),
+// and `n`, the maximum number of entries in a leaf before a
+// new level of the tree is introduced.
 func NewConfig(h Hasher, m ChildIndex, n ChildIndex) Config {
 	return Config{hasher: h, m: m, n: n, c: log2(m)}
 }

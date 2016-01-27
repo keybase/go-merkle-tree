@@ -46,10 +46,10 @@ func findAll(t *testing.T, tree *Tree, objs []KeyValuePair) {
 			t.Fatalf("Find for obj %d yielded an error: %v", i, err)
 		}
 		if v == nil {
-			t.Fatalf("Find for obj %i with key %v returned no results", i, kvp.Key)
+			t.Fatalf("Find for obj %d with key %v returned no results", i, kvp.Key)
 		}
 		if !deepEqual(v, kvp.Value) {
-			t.Fatalf("Didn't get object equality for %d: %+v != %+v", v, kvp.Value)
+			t.Fatalf("Didn't get object equality for %d: %+v != %+v", i, v, kvp.Value)
 		}
 	}
 }

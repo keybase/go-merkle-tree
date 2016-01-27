@@ -4,14 +4,20 @@ import (
 	"sort"
 )
 
+
+// SortedMap is a list of KeyValuePairs, kept in sorted order so
+// that binary search can work.
 type SortedMap struct {
 	list []KeyValuePair
 }
 
+// NewSortedMap makes an empty sorted map.
 func NewSortedMap() *SortedMap {
 	return &SortedMap{}
 }
 
+// NewSortedMapFromSortedList just wraps the given sorted list and
+// doesn't check that it's sorted.  So don't pass it an unsorted list.
 func NewSortedMapFromSortedList(l []KeyValuePair) *SortedMap {
 	return &SortedMap{list: l}
 }
@@ -20,13 +26,15 @@ func newSortedMapFromNode(n *Node) *SortedMap {
 	return NewSortedMapFromSortedList(n.Tab)
 }
 
+// NewSortedMapFromList makes a sorted map from an unsorted list
+// of KeyValuePairs
 func NewSortedMapFromList(l []KeyValuePair) *SortedMap {
 	ret := NewSortedMapFromSortedList(l)
 	ret.sort()
 	return ret
 }
 
-func NewSortedMapFromKeyAndValue(kp KeyValuePair) *SortedMap {
+func newSortedMapFromKeyAndValue(kp KeyValuePair) *SortedMap {
 	return NewSortedMapFromList([]KeyValuePair{kp})
 }
 

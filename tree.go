@@ -218,7 +218,7 @@ func (t *Tree) Upsert(kvp KeyValuePair, txinfo TxInfo) (err error) {
 	// Figure out what to store at the node where we stopped going down the path.
 	var sm *SortedMap
 	if last == nil || last.Type == NodeTypeINode {
-		sm = NewSortedMapFromKeyAndValue(kvp)
+		sm = newSortedMapFromKeyAndValue(kvp)
 		level = 0
 	} else if val2 := last.findValueInLeaf(kvp.Key); val2 == nil || !deepEqual(val2, kvp.Value) {
 		sm = newSortedMapFromNode(last).replace(kvp)
