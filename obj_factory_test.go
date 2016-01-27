@@ -21,18 +21,20 @@ type testValue struct {
 	key   string
 }
 
-type objFactory struct {
+// TestObjFactory generates a bunch of test objects for debugging
+type TestObjFactory struct {
 	objs  map[string]KeyValuePair
 	seqno int
 }
 
-func newObjFactory() *objFactory {
-	return &objFactory{
+// NewTestObjFactor makes a new object factory for testing
+func NewTestObjFactory() *TestObjFactory {
+	return &TestObjFactory{
 		objs: make(map[string]KeyValuePair),
 	}
 }
 
-func (of *objFactory) dumpAll() []KeyValuePair {
+func (of TestObjFactory) dumpAll() []KeyValuePair {
 	var ret []KeyValuePair
 	for _, v := range of.objs {
 		ret = append(ret, v)
@@ -40,7 +42,8 @@ func (of *objFactory) dumpAll() []KeyValuePair {
 	return ret
 }
 
-func (of *objFactory) produce() KeyValuePair {
+// Produce one test object
+func (of *TestObjFactory) Produce() KeyValuePair {
 	key := genBinary(8)
 	keyString := hex.EncodeToString(key)
 	val := testValue{seqno: of.seqno, key: keyString}
@@ -50,15 +53,16 @@ func (of *objFactory) produce() KeyValuePair {
 	return kvp
 }
 
-func (of *objFactory) mproduce(n int) []KeyValuePair {
+// Mproduce makes many test objects.
+func (of *TestObjFactory) Mproduce(n int) []KeyValuePair {
 	var ret []KeyValuePair
 	for i := 0; i < n; i++ {
-		ret = append(ret, of.produce())
+		ret = append(ret, of.Produce())
 	}
 	return ret
 }
 
-func (of *objFactory) modifySome(mod int) {
+func (of *TestObjFactory) modifySome(mod int) {
 	i := 0
 	for _, v := range of.objs {
 		tv, ok := v.Value.(testValue)

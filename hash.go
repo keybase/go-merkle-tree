@@ -1,5 +1,9 @@
 package merkleTree
 
+import (
+	"crypto/sha512"
+)
+
 // Len returns the number of bytes in the hash, but after shifting off
 // leading 0s from the length size of the hash
 func (h Hash) Len() int {
@@ -43,4 +47,13 @@ func (h Hash) Less(h2 Hash) bool {
 // Eq determines if the two hashes are equal.
 func (h Hash) Eq(h2 Hash) bool {
 	return h.cmp(h2) == 0
+}
+
+// SHA512Hasher is a simple SHA512 hash function application
+type SHA512Hasher struct{}
+
+// Hash the data
+func (s SHA512Hasher) Hash(b []byte) Hash {
+	tmp := sha512.Sum512(b)
+	return Hash(tmp[:])
 }

@@ -5,7 +5,7 @@ import (
 )
 
 func makeTestConfig() Config {
-	return NewConfig(sha512Hasher{}, 4, 16)
+	return NewConfig(SHA512Hasher{}, 4, 16)
 }
 
 func newTestMemTree() (t *Tree, m *MemEngine) {
@@ -15,8 +15,8 @@ func newTestMemTree() (t *Tree, m *MemEngine) {
 }
 
 func testSimpleBuild(t *testing.T) {
-	of := newObjFactory()
-	objs := of.mproduce(1024)
+	of := NewTestObjFactory()
+	objs := of.Mproduce(1024)
 	sm := NewSortedMapFromList(objs)
 	tree, _ := newTestMemTree()
 	if err := tree.Build(sm, nil); err != nil {
