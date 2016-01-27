@@ -1,35 +1,33 @@
-
 package merkleTree
 
 import (
 	"math/big"
 )
 
-func byteslice(h Hash, numBytes int, level int) Prefix {
-	start := numBytes*level
-	end := numBytes*(level+1)
+func byteslice(h []byte, numBytes int, level int) []byte {
+	start := numBytes * level
+	end := numBytes * (level + 1)
+	if start > len(h) {
+		start = len(h)
+	}
 	if end > len(h) {
 		end = len(h)
 	}
-	return Prefix(h[start:end])
+	return h[start:end]
 }
 
-func genericBitslice(h Hash, numBits ChildIndex, level Level) Prefix {
-	return Prefix{}
-}
-
-func bitslice(h Hash, numBits ChildIndex, level Level) Prefix {
-	if numBits % 8 == 0 {
-		return byteslice(h, int(numBits / 8), int(level))
+func bitslice(h []byte, numBits int, level int) Prefix {
+	if numBits%8 == 0 {
+		return byteslice(h, numBits/8, level)
 	}
 
 	// Set a begin and end bit index
-	begin := int(numBits)*int(level)
-	end := int(numBits)*int(level + 1)
+	begin := numBits * level
+	end := numBits * (level + 1)
 
-	// Only consider the bytes in question; round the left side up and
-	// the right side down
-	b := h[(begin >> 3):((end + 7) >> 3)]
+	// No sense in using the large tail of the string, just
+	// chop it off here.
+	b := h[:((end + 7) >> 3)]
 
 	z := big.NewInt(0).SetBytes(b)
 	z = z.Rsh(z, uint(len(b)*8-end))
@@ -43,4 +41,3 @@ func bitslice(h Hash, numBits ChildIndex, level Level) Prefix {
 	ret = append(pad, ret...)
 	return ret
 }
-

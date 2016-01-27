@@ -2,6 +2,7 @@ package merkleTree
 
 import (
 	"crypto/sha512"
+	"fmt"
 	"testing"
 )
 
@@ -26,7 +27,7 @@ func TestSimpleBuild(t *testing.T) {
 	of := newObjFactory()
 	objs := of.mproduce(1024)
 	sm := NewSortedMapFromList(objs)
-	tree, _ := newMemTree()
+	tree, mem := newMemTree()
 	if err := tree.Build(sm, nil); err != nil {
 		t.Fatalf("Error in build: %v", err)
 	}
