@@ -11,13 +11,14 @@ type MemEngine struct {
 	nodes map[string](*Node)
 }
 
+// NewMemEngine makes an in-memory storage engine, mainly for testing.
 func NewMemEngine() *MemEngine {
 	return &MemEngine{
 		nodes: make(map[string](*Node)),
 	}
 }
 
-var _ Engine = (*MemEngine)(nil)
+var _ StorageEngine = (*MemEngine)(nil)
 
 // CommitRoot "commits" the root ot the blessed memory slot
 func (m *MemEngine) CommitRoot(prev Hash, curr Hash, txinfo TxInfo) error {

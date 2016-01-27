@@ -8,12 +8,12 @@ import (
 // to run
 type Tree struct {
 	sync.RWMutex
-	eng Engine
+	eng StorageEngine
 	cfg Config
 }
 
 // NewTree makes a new tree
-func NewTree(e Engine, c Config) *Tree {
+func NewTree(e StorageEngine, c Config) *Tree {
 	return &Tree{eng: e, cfg: c}
 }
 
