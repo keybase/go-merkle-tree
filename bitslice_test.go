@@ -18,17 +18,21 @@ func TestBitslice(t *testing.T) {
 		output  []byte
 		numBits int
 		level   int
+		index   uint32
 	}{
-		{data, []byte{0x8c, 0xee}, 16, 1},
-		{data, []byte{0xa6}, 8, 1},
-		{data, []byte{0x0a}, 4, 2},
-		{data, []byte{0x00, 0xe3}, 9, 3},
+		{data, []byte{0x8c, 0xee}, 16, 1, uint32(0x8cee)},
+		{data, []byte{0xa6}, 8, 1, uint32(0xa6)},
+		{data, []byte{0x0a}, 4, 2, uint32(0x0a)},
+		{data, []byte{0x00, 0xe3}, 9, 3, uint32(0xe3)},
 	}
 
 	for i, v := range testVectors {
-		computed := bitslice(v.input, v.numBits, v.level)
+		computed, index := bitslice(v.input, v.numBits, v.level)
 		if !bytes.Equal(v.output, computed) {
 			t.Fatalf("failure in vector %d: got %v; wanted %v", i, computed, v.output)
+		}
+		if index != v.index {
+			t.Fatalf("wrong index: %d != %d", index, v.index)
 		}
 	}
 

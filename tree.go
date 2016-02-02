@@ -39,13 +39,13 @@ func (t *Tree) Build(sm *SortedMap, txi TxInfo) (err error) {
 
 func (t *Tree) hashTreeRecursive(level Level, sm *SortedMap, prevRoot Hash) (ret Hash, err error) {
 	if sm.Len() <= t.cfg.n {
-		ret, err = t.simpleInsert(level, sm, prevRoot)
+		ret, err = t.makeLeaf(level, sm, prevRoot)
 		return ret, err
 	}
 
 	m := t.cfg.m // the number of children we have
 	var j ChildIndex
-	nsm := NewSortedMap() // new sorted map
+	ncpm := newChildPointerMap(m)
 
 	for i := ChildIndex(0); i < m; i++ {
 		prefix := t.cfg.formatPrefix(i)
@@ -60,53 +60,48 @@ func (t *Tree) hashTreeRecursive(level Level, sm *SortedMap, prevRoot Hash) (ret
 			if err != nil {
 				return nil, err
 			}
-			prefix := t.cfg.prefixAtLevel(level, sublist.at(0).Key)
-			nsm.push(KeyValuePair{Key: prefix.ToHash(), Value: ret})
+			ncpm.set(i, ret)
 		}
 	}
-	var node Node
 	var nodeExported []byte
-	if ret, node, nodeExported, err = nsm.exportToNode(t.cfg.hasher, nodeTypeINode, prevRoot, level); err != nil {
+	if ret, _, nodeExported, err = ncpm.exportToNode(t.cfg.hasher, prevRoot, level); err != nil {
 		return nil, err
 	}
-	err = t.eng.StoreNode(ret, node, nodeExported)
+	err = t.eng.StoreNode(ret, nodeExported)
 	return ret, err
 
 }
 
-func (t *Tree) simpleInsert(l Level, sm *SortedMap, prevRoot Hash) (ret Hash, err error) {
-	var node Node
+func (t *Tree) makeLeaf(l Level, sm *SortedMap, prevRoot Hash) (ret Hash, err error) {
 	var nodeExported []byte
-	if ret, node, nodeExported, err = sm.exportToNode(t.cfg.hasher, nodeTypeLeaf, prevRoot, l); err != nil {
+	if ret, _, nodeExported, err = sm.exportToNode(t.cfg.hasher, prevRoot, l); err != nil {
 		return nil, err
 	}
-	if err = t.eng.StoreNode(ret, node, nodeExported); err != nil {
+	if err = t.eng.StoreNode(ret, nodeExported); err != nil {
 		return nil, err
 	}
 	return ret, err
 }
 
-func (t *Tree) verifyNode(h Hash, node *Node) (err error) {
-	var b []byte
-	if b, err = encodeToBytes(node); err != nil {
-		return err
-	}
-	h2 := t.cfg.hasher.Hash(b)
+func (t *Tree) verifyNode(h Hash, raw []byte) (err error) {
+	h2 := t.cfg.hasher.Hash(raw)
 	if !h.Eq(h2) {
 		err = HashMismatchError{H: h}
 	}
 	return err
 }
 
-func (t *Tree) lookupNode(h Hash) (*Node, error) {
-	node, err := t.eng.LookupNode(h)
-	if node == nil && err == nil {
-		err = NodeNotFoundError{H: h}
+func (t *Tree) lookupNode(h Hash) ([]byte, *Node, error) {
+	b := t.eng.LookupNode(h)
+	if b == nil {
+		return nil, nil, NodeNotFoundError{H: h}
 	}
+	var node Node
+	err := decodeFromBytes(&node, b)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
-	return node, err
+	return b, &node, nil
 }
 
 func (t *Tree) findGeneric(h Hash, skipVerify bool) (ret interface{}, root Hash, err error) {
@@ -121,22 +116,23 @@ func (t *Tree) findGeneric(h Hash, skipVerify bool) (ret interface{}, root Hash,
 	var level Level
 	for curr != nil {
 		var node *Node
-		node, err = t.lookupNode(curr)
+		var nodeExported []byte
+		nodeExported, node, err = t.lookupNode(curr)
 		if err != nil {
 			return nil, nil, err
 		}
 		if !skipVerify {
-			if err = t.verifyNode(curr, node); err != nil {
+			if err = t.verifyNode(curr, nodeExported); err != nil {
 				return nil, nil, err
 			}
 		}
 
 		if node.Type == nodeTypeLeaf {
 			ret = node.findValueInLeaf(h)
-			break
+			return ret, root, nil
 		}
-		prfx := t.cfg.prefixAtLevel(level, h)
-		curr, err = node.findChildByPrefix(prfx)
+		_, index := t.cfg.prefixAndIndexAtLevel(level, h)
+		curr, err = node.findChildByIndex(index)
 		if err != nil {
 			return nil, nil, err
 		}
@@ -183,6 +179,7 @@ func (t *Tree) findUnsafe(h Hash) (ret interface{}, root Hash, err error) {
 
 type step struct {
 	p Prefix
+	i ChildIndex
 	n *Node
 	l Level
 }
@@ -218,7 +215,7 @@ func (t *Tree) Upsert(kvp KeyValuePair, txinfo TxInfo) (err error) {
 	var path path
 	var level Level
 
-	curr, err := t.lookupNode(root)
+	_, curr, err := t.lookupNode(root)
 	if err != nil {
 		return err
 	}
@@ -226,21 +223,21 @@ func (t *Tree) Upsert(kvp KeyValuePair, txinfo TxInfo) (err error) {
 	// Find the path from the key up to the root;
 	// find by walking down from the root.
 	for curr != nil {
-		prefix := t.cfg.prefixAtLevel(level, kvp.Key)
-		path.push(step{p: prefix, n: curr, l: level})
+		prefix, index := t.cfg.prefixAndIndexAtLevel(level, kvp.Key)
+		path.push(step{p: prefix, n: curr, l: level, i: index})
 		level++
 		last = curr
 		if curr.Type == nodeTypeLeaf {
 			break
 		}
-		nxt, err := curr.findChildByPrefix(prefix)
+		nxt, err := curr.findChildByIndex(index)
 		if err != nil {
 			return err
 		}
 		if nxt == nil {
 			break
 		}
-		curr, err = t.lookupNode(nxt)
+		_, curr, err = t.lookupNode(nxt)
 		if err != nil {
 			return err
 		}
@@ -270,14 +267,13 @@ func (t *Tree) Upsert(kvp KeyValuePair, txinfo TxInfo) (err error) {
 		if step.n.Type != nodeTypeINode {
 			continue
 		}
-		sm := newSortedMapFromNode(step.n).replace(KeyValuePair{Key: step.p.ToHash(), Value: hsh})
-		var node Node
+		sm := newChildPointerMapFromNode(step.n).set(step.i, hsh)
 		var nodeExported []byte
-		hsh, node, nodeExported, err = sm.exportToNode(t.cfg.hasher, nodeTypeINode, prevRoot, step.l)
+		hsh, _, nodeExported, err = sm.exportToNode(t.cfg.hasher, prevRoot, step.l)
 		if err != nil {
 			return err
 		}
-		err = t.eng.StoreNode(hsh, node, nodeExported)
+		err = t.eng.StoreNode(hsh, nodeExported)
 		if err != nil {
 			return err
 		}

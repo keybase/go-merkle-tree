@@ -19,8 +19,8 @@ type Prefix []byte
 // hash from the one used for interior nodes.
 type KeyValuePair struct {
 	_struct bool        `codec:",toarray"`
-	Key     Hash        `codec:"key"`
-	Value   interface{} `codec:"value"`
+	Key     Hash        `codec:"k"`
+	Value   interface{} `codec:"v"`
 }
 
 type nodeType int
@@ -34,9 +34,10 @@ const (
 // Node is a node in the merkle tree. Can be either an interior iNode or
 // a leaf that has pointers to user data.
 type Node struct {
-	PrevRoot Hash           `codec:"prev_root,omitempty"`
-	Tab      []KeyValuePair `codec:"tab"`
-	Type     nodeType       `codec:"type"`
+	PrevRoot Hash           `codec:"p,omitempty"`
+	INodes   []Hash         `codec:"i,omitempty"`
+	Leafs    []KeyValuePair `codec:"l,omitempty"`
+	Type     nodeType       `codec:"t"`
 }
 
 // Level specifies what level of the merkle tree we are at.

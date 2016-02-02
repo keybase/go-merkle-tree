@@ -1,10 +1,11 @@
 package merkleTree
 
 import (
+	"encoding/binary"
 	"math/big"
 )
 
-func byteslice(h []byte, numBytes int, level int) []byte {
+func byteslice(h []byte, numBytes int, level int) ([]byte, uint32) {
 	start := numBytes * level
 	end := numBytes * (level + 1)
 	if start > len(h) {
@@ -13,10 +14,16 @@ func byteslice(h []byte, numBytes int, level int) []byte {
 	if end > len(h) {
 		end = len(h)
 	}
-	return h[start:end]
+	ret := h[start:end]
+
+	// Also map the returned byteslice to 0,1,2....2^numBytes
+	var tmp [4]byte
+	copy(tmp[(4-len(ret)):], ret)
+	index := binary.BigEndian.Uint32(tmp[:])
+	return ret, index
 }
 
-func bitslice(h []byte, numBits int, level int) Prefix {
+func bitslice(h []byte, numBits int, level int) (Prefix, uint32) {
 	if numBits%8 == 0 {
 		return byteslice(h, numBits/8, level)
 	}
@@ -39,5 +46,14 @@ func bitslice(h []byte, numBits int, level int) Prefix {
 	padlen := (end+7-begin)/8 - len(ret)
 	pad := make([]byte, padlen)
 	ret = append(pad, ret...)
-	return ret
+
+	tmp := z.Int64()
+	var index uint32
+	if tmp >= 0 && tmp <= 0xffffffff {
+		index = uint32(tmp)
+	} else {
+		panic("should never happen")
+	}
+
+	return ret, index
 }
