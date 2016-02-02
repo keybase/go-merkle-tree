@@ -10,6 +10,15 @@ type Hasher interface {
 	Hash([]byte) Hash
 }
 
+// ValueConstructor is an interface for constructing values, so that typed
+// values can be pulled out of the Merkle Tree. We are of course assuming
+// that there is only one type of Value at the leaves, which makes sense.
+type ValueConstructor interface {
+	// Construct a new template empty value for the leaf, so that the
+	// Unmarshalling routine has the correct type template.
+ 	Construct() interface{}
+}
+
 // Config defines the shape of the MerkleTree.
 type Config struct {
 	// A hasher is used to compute hashes in this configuration
@@ -23,6 +32,9 @@ type Config struct {
 
 	// If we have M children per node, how many bits does it take to represent it?
 	c ChildIndex
+
+	// Construct a new object to unmarshal values into
+	v ValueConstructor
 }
 
 func log2(y ChildIndex) ChildIndex {
@@ -39,8 +51,8 @@ func log2(y ChildIndex) ChildIndex {
 // is the number of children per interior node (we recommend 256),
 // and `n`, the maximum number of entries in a leaf before a
 // new level of the tree is introduced.
-func NewConfig(h Hasher, m ChildIndex, n ChildIndex) Config {
-	return Config{hasher: h, m: m, n: n, c: log2(m)}
+func NewConfig(h Hasher, m ChildIndex, n ChildIndex, v ValueConstructor) Config {
+	return Config{hasher: h, m: m, n: n, c: log2(m), v : v}
 }
 
 func (c Config) prefixAtLevel(level Level, h Hash) Prefix {

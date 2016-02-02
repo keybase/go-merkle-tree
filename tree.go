@@ -109,7 +109,7 @@ func (t *Tree) lookupNode(h Hash) (*Node, error) {
 	return node, err
 }
 
-func (t *Tree) find(h Hash, skipVerify bool) (ret interface{}, root Hash, err error) {
+func (t *Tree) findGeneric(h Hash, skipVerify bool) (ret interface{}, root Hash, err error) {
 	t.RLock()
 	defer t.RUnlock()
 
@@ -145,17 +145,40 @@ func (t *Tree) find(h Hash, skipVerify bool) (ret interface{}, root Hash, err er
 	return ret, root, err
 }
 
+func (t *Tree) findTyped(h Hash, skipVerify bool) (ret interface{}, root Hash, err error) {
+	ret, root, err = t.findGeneric(h, skipVerify)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	// Slightly hacky --- reenocode to bytes, and the encode again
+	// into the typed container. For now, this will do. Long term, it
+	// might be a waste of a few CPU cycles.
+	var tmp []byte
+	tmp, err = encodeToBytes(ret)
+	if err != nil {
+		return nil, nil, err
+	}
+	obj := t.cfg.v.Construct()
+	err = decodeFromBytes(&obj, tmp)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return obj, root, nil
+}
+
 // Find the hash in the tree. Return the value stored at the leaf under
 // that hash, or nil if not found.  Return an error if there was an
 // internal problem.
 func (t *Tree) Find(h Hash) (ret interface{}, root Hash, err error) {
-	return t.find(h, false)
+	return t.findTyped(h, false)
 }
 
 // findUnsafe shouldn't be used, since it will skip hash comparisons
 // at interior nodes.  It's mainly here for testing.
 func (t *Tree) findUnsafe(h Hash) (ret interface{}, root Hash, err error) {
-	return t.find(h, true)
+	return t.findTyped(h, true)
 }
 
 type step struct {

@@ -76,3 +76,7 @@ func (of *TestObjFactory) modifySome(mod int) {
 		i++
 	}
 }
+
+func (of *TestObjFactory) Construct() interface{} {
+	return testValue{}
+}

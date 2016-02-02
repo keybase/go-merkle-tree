@@ -4,13 +4,13 @@ import (
 	"testing"
 )
 
-func makeTestConfig() Config {
-	return NewConfig(SHA512Hasher{}, 4, 16)
+func makeTestConfig(of *TestObjFactory) Config {
+	return NewConfig(SHA512Hasher{}, 4, 16, of)
 }
 
-func newTestMemTree() (t *Tree, m *MemEngine) {
+func newTestMemTree(of *TestObjFactory) (t *Tree, m *MemEngine) {
 	m = NewMemEngine()
-	t = NewTree(m, makeTestConfig())
+	t = NewTree(m, makeTestConfig(of))
 	return t, m
 }
 
@@ -18,7 +18,7 @@ func testSimpleBuild(t *testing.T) {
 	of := NewTestObjFactory()
 	objs := of.Mproduce(1024)
 	sm := NewSortedMapFromList(objs)
-	tree, _ := newTestMemTree()
+	tree, _ := newTestMemTree(of)
 	if err := tree.Build(sm, nil); err != nil {
 		t.Fatalf("Error in build: %v", err)
 	}
