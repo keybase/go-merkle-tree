@@ -95,9 +95,15 @@ func (s *SortedMap) replace(kvp KeyValuePair) *SortedMap {
 		if eq {
 			j++
 		}
-		lst := append(s.list[0:i], kvp)
-		lst = append(lst, s.list[j:]...)
-		s.list = lst
+
+		// Grow the list by one
+		out := append(s.list, KeyValuePair{})
+		// shift everything over by 1
+		copy(out[(j+1):], out[j:])
+		// Move the new element into the empty space
+		out[j] = kvp
+		// Put the new list into place
+		s.list = out
 
 	} else {
 		s.list = []KeyValuePair{kvp}
@@ -116,12 +122,4 @@ func (s *SortedMap) at(i ChildIndex) KeyValuePair {
 
 func (s *SortedMap) slice(begin, end ChildIndex) *SortedMap {
 	return NewSortedMapFromList(s.list[begin:end])
-}
-
-func (n *Node) findValueInLeaf(h Hash) interface{} {
-	kvp := newSortedMapFromNode(n).find(h)
-	if kvp == nil {
-		return nil
-	}
-	return kvp.Value
 }
