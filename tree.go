@@ -214,10 +214,14 @@ func (t *Tree) Upsert(kvp KeyValuePair, txinfo TxInfo) (err error) {
 
 	var path path
 	var level Level
+	var curr *Node
 
-	_, curr, err := t.lookupNode(root)
-	if err != nil {
-		return err
+	// Root might be nil if we're upserting into an empty tree
+	if root != nil {
+		_, curr, err = t.lookupNode(root)
+		if err != nil {
+			return err
+		}
 	}
 
 	// Find the path from the key up to the root;
