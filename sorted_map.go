@@ -22,7 +22,7 @@ func NewSortedMapFromSortedList(l []KeyValuePair) *SortedMap {
 }
 
 func newSortedMapFromNode(n *Node) *SortedMap {
-	return NewSortedMapFromSortedList(n.Tab)
+	return NewSortedMapFromSortedList(n.Leafs)
 }
 
 // NewSortedMapFromList makes a sorted map from an unsorted list
@@ -51,15 +51,10 @@ func (s *SortedMap) push(kp KeyValuePair) {
 	s.list = append(s.list, kp)
 }
 
-func (s *SortedMap) exportToNode(h Hasher, typ nodeType, prevRoot Hash, level Level) (hash Hash, node Node, objExported []byte, err error) {
-	if prevRoot != nil && level == Level(0) {
-		node.PrevRoot = prevRoot
-	}
-	node.Type = typ
-	node.Tab = s.list
-	objExported, err = encodeToBytes(node)
-	hash = h.Hash(objExported)
-	return hash, node, objExported, err
+func (s *SortedMap) exportToNode(h Hasher, prevRoot Hash, level Level) (hash Hash, node Node, objExported []byte, err error) {
+	node.Type = nodeTypeLeaf
+	node.Leafs = s.list
+	return node.export(h, prevRoot, level)
 }
 
 func (s *SortedMap) binarySearch(k Hash) (ret int, eq bool) {
@@ -129,16 +124,4 @@ func (n *Node) findValueInLeaf(h Hash) interface{} {
 		return nil
 	}
 	return kvp.Value
-}
-
-func (n *Node) findChildByPrefix(p Prefix) (Hash, error) {
-	kvp := newSortedMapFromNode(n).find(Hash(p))
-	if kvp == nil {
-		return nil, nil
-	}
-	b, ok := (kvp.Value).(Hash)
-	if !ok {
-		return nil, BadChildPointerError{kvp.Value}
-	}
-	return Hash(b), nil
 }

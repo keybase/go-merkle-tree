@@ -8,13 +8,13 @@ import (
 // MemEngine is an in-memory MerkleTree engine, used now mainly for testing
 type MemEngine struct {
 	root  Hash
-	nodes map[string](*Node)
+	nodes map[string][]byte
 }
 
 // NewMemEngine makes an in-memory storage engine, mainly for testing.
 func NewMemEngine() *MemEngine {
 	return &MemEngine{
-		nodes: make(map[string](*Node)),
+		nodes: make(map[string][]byte),
 	}
 }
 
@@ -33,9 +33,8 @@ func (m *MemEngine) Hash(d []byte) Hash {
 }
 
 // LookupNode looks up a MerkleTree node by hash
-func (m *MemEngine) LookupNode(h Hash) (*Node, error) {
-	ret := m.nodes[hex.EncodeToString(h)]
-	return ret, nil
+func (m *MemEngine) LookupNode(h Hash) (b []byte) {
+	return m.nodes[hex.EncodeToString(h)]
 }
 
 // LookupRoot fetches the root of the in-memory tree back out
@@ -44,7 +43,7 @@ func (m *MemEngine) LookupRoot() (Hash, error) {
 }
 
 // StoreNode stores the given node under the given key.
-func (m *MemEngine) StoreNode(key Hash, val Node, _ []byte) error {
-	m.nodes[hex.EncodeToString(key)] = &val
+func (m *MemEngine) StoreNode(key Hash, b []byte) error {
+	m.nodes[hex.EncodeToString(key)] = b
 	return nil
 }

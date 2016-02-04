@@ -17,8 +17,10 @@ func genBinary(l int) []byte {
 }
 
 type testValue struct {
-	seqno int
-	key   string
+	_struct bool `codec:",toarray"`
+	Seqno   int
+	Key     string
+	KeyRaw  []byte
 }
 
 // TestObjFactory generates a bunch of test objects for debugging
@@ -46,7 +48,7 @@ func (of TestObjFactory) dumpAll() []KeyValuePair {
 func (of *TestObjFactory) Produce() KeyValuePair {
 	key := genBinary(8)
 	keyString := hex.EncodeToString(key)
-	val := testValue{seqno: of.seqno, key: keyString}
+	val := testValue{Seqno: of.seqno, Key: keyString, KeyRaw: key}
 	of.seqno++
 	kvp := KeyValuePair{Key: key, Value: val}
 	of.objs[keyString] = kvp
@@ -70,8 +72,8 @@ func (of *TestObjFactory) modifySome(mod int) {
 			panic(fmt.Sprintf("Got value of wrong type: %T", v))
 		}
 		if (i % mod) == 0 {
-			tv.seqno *= 2
-			tv.key += "-yo-dawg"
+			tv.Seqno *= 2
+			tv.Key += "-yo-dawg"
 		}
 		i++
 	}

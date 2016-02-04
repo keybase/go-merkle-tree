@@ -1,6 +1,7 @@
 package merkleTree
 
 import (
+	"errors"
 	"fmt"
 )
 
@@ -32,3 +33,6 @@ type BadChildPointerError struct {
 func (b BadChildPointerError) Error() string {
 	return fmt.Sprintf("Wanted a Hash; got type %T instead", b.V)
 }
+
+// ErrBadINode is thrown when we find a corrupt/malformed iNode
+var ErrBadINode = errors.New("Bad iNode found")

@@ -16,7 +16,7 @@ type Hasher interface {
 type ValueConstructor interface {
 	// Construct a new template empty value for the leaf, so that the
 	// Unmarshalling routine has the correct type template.
- 	Construct() interface{}
+	Construct() interface{}
 }
 
 // Config defines the shape of the MerkleTree.
@@ -52,11 +52,16 @@ func log2(y ChildIndex) ChildIndex {
 // and `n`, the maximum number of entries in a leaf before a
 // new level of the tree is introduced.
 func NewConfig(h Hasher, m ChildIndex, n ChildIndex, v ValueConstructor) Config {
-	return Config{hasher: h, m: m, n: n, c: log2(m), v : v}
+	return Config{hasher: h, m: m, n: n, c: log2(m), v: v}
 }
 
+func (c Config) prefixAndIndexAtLevel(level Level, h Hash) (Prefix, ChildIndex) {
+	prfx, ci := bitslice(h, int(c.c), int(level))
+	return Prefix(prfx), ChildIndex(ci)
+}
 func (c Config) prefixAtLevel(level Level, h Hash) Prefix {
-	return Prefix(bitslice(h, int(c.c), int(level)))
+	ret, _ := c.prefixAndIndexAtLevel(level, h)
+	return ret
 }
 
 func div8roundUp(i ChildIndex) ChildIndex {
