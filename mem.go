@@ -33,8 +33,8 @@ func (m *MemEngine) Hash(d []byte) Hash {
 }
 
 // LookupNode looks up a MerkleTree node by hash
-func (m *MemEngine) LookupNode(h Hash) (b []byte) {
-	return m.nodes[hex.EncodeToString(h)]
+func (m *MemEngine) LookupNode(h Hash) (b []byte, err error) {
+	return m.nodes[hex.EncodeToString(h)], nil
 }
 
 // LookupRoot fetches the root of the in-memory tree back out

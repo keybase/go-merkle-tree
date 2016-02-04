@@ -92,12 +92,15 @@ func (t *Tree) verifyNode(h Hash, raw []byte) (err error) {
 }
 
 func (t *Tree) lookupNode(h Hash) ([]byte, *Node, error) {
-	b := t.eng.LookupNode(h)
+	b, err := t.eng.LookupNode(h)
+	if err != nil {
+		return nil, nil, err
+	}
 	if b == nil {
 		return nil, nil, NodeNotFoundError{H: h}
 	}
 	var node Node
-	err := decodeFromBytes(&node, b)
+	err = decodeFromBytes(&node, b)
 	if err != nil {
 		return nil, nil, err
 	}

@@ -5,6 +5,6 @@ package merkleTree
 type StorageEngine interface {
 	StoreNode(Hash, []byte) error
 	CommitRoot(prev Hash, curr Hash, txinfo TxInfo) error
-	LookupNode(Hash) []byte
+	LookupNode(Hash) ([]byte, error)
 	LookupRoot() (Hash, error)
 }
