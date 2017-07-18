@@ -1,6 +1,8 @@
 package merkleTree_test
 
 import (
+	"golang.org/x/net/context"
+
 	merkleTree "github.com/keybase/go-merkle-tree"
 )
 
@@ -38,5 +40,5 @@ func ExampleTree_Build() {
 	var txInfo merkleTree.TxInfo
 
 	// Build the tree
-	tree.Build(sm, txInfo)
+	tree.Build(context.TODO(), sm, txInfo)
 }
