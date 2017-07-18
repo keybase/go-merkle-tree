@@ -2,6 +2,8 @@ package merkleTree
 
 import (
 	"testing"
+
+	"golang.org/x/net/context"
 )
 
 func makeTestConfig(of *TestObjFactory, m ChildIndex, n ChildIndex) Config {
@@ -19,7 +21,7 @@ func testSimpleBuild(t *testing.T, numElem int, m ChildIndex, n ChildIndex) {
 	objs := of.Mproduce(numElem)
 	sm := NewSortedMapFromList(objs)
 	tree, _ := newTestMemTree(of, m, n)
-	if err := tree.Build(sm, nil); err != nil {
+	if err := tree.Build(context.TODO(), sm, nil); err != nil {
 		t.Fatalf("Error in build: %v", err)
 	}
 	findAll(t, tree, objs)
@@ -30,7 +32,7 @@ func testUpsertBuild(t *testing.T, numElem int, m ChildIndex, n ChildIndex) {
 	objs := of.Mproduce(numElem)
 	tree, _ := newTestMemTree(of, m, n)
 	for _, obj := range objs {
-		if err := tree.Upsert(obj, nil); err != nil {
+		if err := tree.Upsert(context.TODO(), obj, nil); err != nil {
 			t.Fatalf("Error in upsert: %v\n", err)
 		}
 	}
@@ -61,7 +63,7 @@ func TestSimpleBuildSmall(t *testing.T) {
 
 func findAll(t *testing.T, tree *Tree, objs []KeyValuePair) {
 	for i, kvp := range objs {
-		v, _, err := tree.Find(kvp.Key)
+		v, _, err := tree.Find(context.TODO(), kvp.Key)
 		if err != nil {
 			t.Fatalf("Find for obj %d yielded an error: %v", i, err)
 		}
