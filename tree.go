@@ -34,6 +34,7 @@ func (t *Tree) Build(
 		Level(0), sm, prevRoot); err != nil {
 		return err
 	}
+
 	if err = t.eng.CommitRoot(ctx, prevRoot, nextRoot, txi); err != nil {
 		return err
 	}
@@ -141,7 +142,7 @@ func (t *Tree) findGeneric(ctx context.Context, h Hash, skipVerify bool) (ret in
 			}
 		}
 
-		if node.Type == nodeTypeLeaf {
+		if node.Type == NodeTypeLeaf {
 			ret = node.findValueInLeaf(h)
 			return ret, root, nil
 		}
@@ -245,7 +246,7 @@ func (t *Tree) Upsert(ctx context.Context, kvp KeyValuePair, txinfo TxInfo) (err
 		path.push(step{p: prefix, n: curr, l: level, i: index})
 		level++
 		last = curr
-		if curr.Type == nodeTypeLeaf {
+		if curr.Type == NodeTypeLeaf {
 			break
 		}
 		nxt, err := curr.findChildByIndex(index)
@@ -263,7 +264,7 @@ func (t *Tree) Upsert(ctx context.Context, kvp KeyValuePair, txinfo TxInfo) (err
 
 	// Figure out what to store at the node where we stopped going down the path.
 	var sm *SortedMap
-	if last == nil || last.Type == nodeTypeINode {
+	if last == nil || last.Type == NodeTypeINode {
 		sm = newSortedMapFromKeyAndValue(kvp)
 		level = 0
 	} else if val2 := last.findValueInLeaf(kvp.Key); val2 == nil || !deepEqual(val2, kvp.Value) {
@@ -282,7 +283,7 @@ func (t *Tree) Upsert(ctx context.Context, kvp KeyValuePair, txinfo TxInfo) (err
 	path.reverse()
 
 	for _, step := range path.steps {
-		if step.n.Type != nodeTypeINode {
+		if step.n.Type != NodeTypeINode {
 			continue
 		}
 		sm := newChildPointerMapFromNode(step.n).set(step.i, hsh)
