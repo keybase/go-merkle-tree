@@ -63,6 +63,12 @@ func (c Config) prefixAtLevel(level Level, h Hash) Prefix {
 	ret, _ := c.prefixAndIndexAtLevel(level, h)
 	return ret
 }
+func (c Config) PrefixAndIndexAtLevel(level Level, h Hash) (Prefix, ChildIndex) {
+	return c.prefixAndIndexAtLevel(level, h)
+}
+func (c Config) PrefixAtLevel(level Level, h Hash) Prefix {
+	return c.prefixAtLevel(level, h)
+}
 
 func div8roundUp(i ChildIndex) ChildIndex {
 	return ((i + 7) >> 3)
