@@ -3,21 +3,16 @@ package merkleTree
 import (
 	"crypto/rand"
 	"encoding/hex"
-	"fmt"
 )
-
-func genString(l int) string {
-	return hex.EncodeToString(genBinary((l + 2) / 1))[0:l]
-}
 
 func genBinary(l int) []byte {
 	b := make([]byte, l)
-	rand.Read(b)
+	_, _ = rand.Read(b)
 	return b
 }
 
 type testValue struct {
-	_struct bool `codec:",toarray"`
+	_struct bool `codec:",toarray"` //nolint
 	Seqno   int
 	Key     string
 	KeyRaw  []byte
@@ -34,14 +29,6 @@ func NewTestObjFactory() *TestObjFactory {
 	return &TestObjFactory{
 		objs: make(map[string]KeyValuePair),
 	}
-}
-
-func (of TestObjFactory) dumpAll() []KeyValuePair {
-	var ret []KeyValuePair
-	for _, v := range of.objs {
-		ret = append(ret, v)
-	}
-	return ret
 }
 
 // Produce one test object
@@ -62,21 +49,6 @@ func (of *TestObjFactory) Mproduce(n int) []KeyValuePair {
 		ret = append(ret, of.Produce())
 	}
 	return ret
-}
-
-func (of *TestObjFactory) modifySome(mod int) {
-	i := 0
-	for _, v := range of.objs {
-		tv, ok := v.Value.(testValue)
-		if !ok {
-			panic(fmt.Sprintf("Got value of wrong type: %T", v))
-		}
-		if (i % mod) == 0 {
-			tv.Seqno *= 2
-			tv.Key += "-yo-dawg"
-		}
-		i++
-	}
 }
 
 func (of *TestObjFactory) Construct() interface{} {
