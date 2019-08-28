@@ -18,7 +18,7 @@ type Prefix []byte
 // Note that though the key is of type `Hash`, it can be a smaller or different
 // hash from the one used for interior nodes.
 type KeyValuePair struct {
-	_struct bool        `codec:",toarray"`
+	_struct bool        `codec:",toarray"` //nolint
 	Key     Hash        `codec:"k"`
 	Value   interface{} `codec:"v"`
 }

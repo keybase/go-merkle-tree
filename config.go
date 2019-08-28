@@ -57,7 +57,7 @@ func NewConfig(h Hasher, m ChildIndex, n ChildIndex, v ValueConstructor) Config 
 
 func (c Config) prefixAndIndexAtLevel(level Level, h Hash) (Prefix, ChildIndex) {
 	prfx, ci := bitslice(h, int(c.c), int(level))
-	return Prefix(prfx), ChildIndex(ci)
+	return prfx, ChildIndex(ci)
 }
 func (c Config) prefixAtLevel(level Level, h Hash) Prefix {
 	ret, _ := c.prefixAndIndexAtLevel(level, h)
@@ -68,10 +68,6 @@ func (c Config) PrefixAndIndexAtLevel(level Level, h Hash) (Prefix, ChildIndex) 
 }
 func (c Config) PrefixAtLevel(level Level, h Hash) Prefix {
 	return c.prefixAtLevel(level, h)
-}
-
-func div8roundUp(i ChildIndex) ChildIndex {
-	return ((i + 7) >> 3)
 }
 
 func (c Config) formatPrefix(index ChildIndex) Prefix {

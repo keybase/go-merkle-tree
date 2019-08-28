@@ -186,12 +186,6 @@ func (t *Tree) Find(ctx context.Context, h Hash) (ret interface{}, root Hash, er
 	return t.findTyped(ctx, h, false)
 }
 
-// findUnsafe shouldn't be used, since it will skip hash comparisons
-// at interior nodes.  It's mainly here for testing.
-func (t *Tree) findUnsafe(ctx context.Context, h Hash) (ret interface{}, root Hash, err error) {
-	return t.findTyped(ctx, h, true)
-}
-
 type step struct {
 	p Prefix
 	i ChildIndex

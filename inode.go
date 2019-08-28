@@ -1,7 +1,5 @@
 package merkleTree
 
-import ()
-
 type childPointerMap struct {
 	tab []Hash
 }
