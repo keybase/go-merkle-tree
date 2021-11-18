@@ -93,7 +93,8 @@ func (s *SortedMap) replace(kvp KeyValuePair) *SortedMap {
 		}
 
 		// Grow the list by one
-		out := append(s.list, KeyValuePair{})
+		out := s.list
+		out = append(out, KeyValuePair{})
 		// shift everything over by 1
 		copy(out[(j+1):], out[j:])
 		// Move the new element into the empty space
