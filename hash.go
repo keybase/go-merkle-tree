@@ -1,4 +1,4 @@
-package merkleTree
+package merkletree
 
 import (
 	"crypto/sha512"

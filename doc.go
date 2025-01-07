@@ -1,5 +1,5 @@
 /*
-Package merkleTree is a generic Merkle Tree implementation, for provably publishing lots
+Package merkletree is a generic Merkle Tree implementation, for provably publishing lots
 of data under one succinct tree root.
 
 Install:
@@ -51,4 +51,4 @@ To construct a new Tree from scratch, you need to specify three parameters:
 
   - An array of KeyValuePairs, the things actually stored in the Merkle tree.
 */
-package merkleTree
+package merkletree
