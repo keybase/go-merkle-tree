@@ -1,4 +1,4 @@
-package merkleTree
+package merkletree
 
 type childPointerMap struct {
 	tab []Hash

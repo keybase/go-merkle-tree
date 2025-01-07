@@ -1,4 +1,4 @@
-package merkleTree
+package merkletree
 
 // Hash is a byte-array, used to represent a full collision-resistant hash.
 type Hash []byte

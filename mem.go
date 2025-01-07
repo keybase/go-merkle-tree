@@ -1,4 +1,4 @@
-package merkleTree
+package merkletree
 
 import (
 	"crypto/sha512"
@@ -23,7 +23,7 @@ func NewMemEngine() *MemEngine {
 var _ StorageEngine = (*MemEngine)(nil)
 
 // CommitRoot "commits" the root ot the blessed memory slot
-func (m *MemEngine) CommitRoot(_ context.Context, prev Hash, curr Hash, txinfo TxInfo) error {
+func (m *MemEngine) CommitRoot(_ context.Context, _ Hash, curr Hash, _ TxInfo) error {
 	m.root = curr
 	return nil
 }

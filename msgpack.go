@@ -1,7 +1,8 @@
-package merkleTree
+package merkletree
 
 import (
 	"bytes"
+
 	"github.com/keybase/go-codec/codec"
 )
 
