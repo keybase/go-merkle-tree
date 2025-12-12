@@ -1,9 +1,8 @@
 package merkletree
 
 import (
+	"context"
 	"sync"
-
-	"golang.org/x/net/context"
 )
 
 // Tree is the MerkleTree class; it needs an engine and a configuration
@@ -22,7 +21,8 @@ func NewTree(e StorageEngine, c Config) *Tree {
 // Build a tree from scratch, taking a batch input. Provide the
 // batch import (it should be sorted), and also an optional TxInfo.
 func (t *Tree) Build(
-	ctx context.Context, sm *SortedMap, txi TxInfo) (err error) {
+	ctx context.Context, sm *SortedMap, txi TxInfo,
+) (err error) {
 	t.Lock()
 	defer t.Unlock()
 
@@ -43,7 +43,8 @@ func (t *Tree) Build(
 }
 
 func (t *Tree) hashTreeRecursive(ctx context.Context,
-	level Level, sm *SortedMap, prevRoot Hash) (ret Hash, err error) {
+	level Level, sm *SortedMap, prevRoot Hash,
+) (ret Hash, err error) {
 	select {
 	case <-ctx.Done():
 		return nil, ctx.Err()
@@ -81,7 +82,6 @@ func (t *Tree) hashTreeRecursive(ctx context.Context,
 	}
 	err = t.eng.StoreNode(ctx, ret, nodeExported)
 	return ret, err
-
 }
 
 func (t *Tree) makeLeaf(ctx context.Context, l Level, sm *SortedMap, prevRoot Hash) (ret Hash, err error) {

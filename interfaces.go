@@ -1,6 +1,6 @@
 package merkletree
 
-import "golang.org/x/net/context"
+import "context"
 
 // StorageEngine specifies how to store and lookup merkle tree nodes
 // and roots.  You can use a DB like Dynamo or SQL to do this.

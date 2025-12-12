@@ -1,13 +1,12 @@
 package merkletree_test
 
 import (
-	"golang.org/x/net/context"
+	"context"
 
 	merkletree "github.com/keybase/go-merkle-tree"
 )
 
 func ExampleTree_Build() {
-
 	// factory is an "object factory" that makes a whole bunch
 	// of phony objects. Importantly, it fits the 'ValueConstructor'
 	// interface, so that it can tell the MerkleTree class how
