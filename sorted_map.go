@@ -80,7 +80,7 @@ func (s *SortedMap) find(k Hash) *KeyValuePair {
 	if !eq {
 		return nil
 	}
-	ret := s.at(ChildIndex(i))
+	ret := s.at(ChildIndex(i)) //nolint:gosec // G115: search index is always non-negative
 	return &ret
 }
 
@@ -110,7 +110,7 @@ func (s *SortedMap) replace(kvp KeyValuePair) *SortedMap {
 
 // Len returns the number of items in the Map.
 func (s *SortedMap) Len() ChildIndex {
-	return ChildIndex(len(s.list))
+	return ChildIndex(len(s.list)) //nolint:gosec // G115: list length is always non-negative
 }
 
 func (s *SortedMap) at(i ChildIndex) KeyValuePair {

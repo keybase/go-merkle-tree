@@ -56,16 +56,19 @@ func NewConfig(h Hasher, m ChildIndex, n ChildIndex, v ValueConstructor) Config 
 }
 
 func (c Config) prefixAndIndexAtLevel(level Level, h Hash) (Prefix, ChildIndex) {
-	prfx, ci := bitslice(h, int(c.c), int(level))
+	prfx, ci := bitslice(h, int(c.c), int(level)) //nolint:gosec // G115: Level is bounded by config
 	return prfx, ChildIndex(ci)
 }
+
 func (c Config) prefixAtLevel(level Level, h Hash) Prefix {
 	ret, _ := c.prefixAndIndexAtLevel(level, h)
 	return ret
 }
+
 func (c Config) PrefixAndIndexAtLevel(level Level, h Hash) (Prefix, ChildIndex) {
 	return c.prefixAndIndexAtLevel(level, h)
 }
+
 func (c Config) PrefixAtLevel(level Level, h Hash) Prefix {
 	return c.prefixAtLevel(level, h)
 }

@@ -3,7 +3,7 @@ package merkletree
 import "testing"
 
 func TestHashLen(t *testing.T) {
-	var tests = []struct {
+	tests := []struct {
 		desc     string
 		hash     Hash
 		expected int
@@ -22,8 +22,6 @@ func TestHashLen(t *testing.T) {
 			if actual != tt.expected {
 				t.Errorf("(%s): expected %d, actual %d", tt.desc, tt.expected, actual)
 			}
-
 		})
 	}
-
 }

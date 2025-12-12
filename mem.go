@@ -1,10 +1,9 @@
 package merkletree
 
 import (
+	"context"
 	"crypto/sha512"
 	"encoding/hex"
-
-	"golang.org/x/net/context"
 )
 
 // MemEngine is an in-memory MerkleTree engine, used now mainly for testing

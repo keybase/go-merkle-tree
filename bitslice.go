@@ -37,9 +37,9 @@ func bitslice(h []byte, numBits int, level int) (Prefix, uint32) {
 	b := h[:((end + 7) >> 3)]
 
 	z := big.NewInt(0).SetBytes(b)
-	z = z.Rsh(z, uint(len(b)*8-end))
+	z = z.Rsh(z, uint(len(b)*8-end)) //nolint:gosec // G115: expression is always non-negative by construction
 	modulus := big.NewInt(1)
-	modulus = modulus.Lsh(modulus, uint(end-begin))
+	modulus = modulus.Lsh(modulus, uint(end-begin)) //nolint:gosec // G115: expression is always non-negative by construction
 	z = z.Mod(z, modulus)
 	ret := z.Bytes()
 
