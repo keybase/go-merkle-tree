@@ -16,7 +16,7 @@ type Hasher interface {
 type ValueConstructor interface {
 	// Construct a new template empty value for the leaf, so that the
 	// Unmarshalling routine has the correct type template.
-	Construct() interface{}
+	Construct() any
 }
 
 // Config defines the shape of the MerkleTree.

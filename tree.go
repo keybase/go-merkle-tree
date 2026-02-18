@@ -60,7 +60,7 @@ func (t *Tree) hashTreeRecursive(ctx context.Context,
 	var j ChildIndex
 	ncpm := newChildPointerMap(m)
 
-	for i := ChildIndex(0); i < m; i++ {
+	for i := range m {
 		prefix := t.cfg.formatPrefix(i)
 		start := j
 		for j < sm.Len() && t.cfg.prefixAtLevel(level, sm.at(j).Key).Eq(prefix) {
@@ -119,7 +119,7 @@ func (t *Tree) lookupNode(ctx context.Context, h Hash) ([]byte, *Node, error) {
 	return b, &node, nil
 }
 
-func (t *Tree) findGeneric(ctx context.Context, h Hash, skipVerify bool) (ret interface{}, root Hash, err error) {
+func (t *Tree) findGeneric(ctx context.Context, h Hash, skipVerify bool) (ret any, root Hash, err error) {
 	t.RLock()
 	defer t.RUnlock()
 
@@ -156,7 +156,7 @@ func (t *Tree) findGeneric(ctx context.Context, h Hash, skipVerify bool) (ret in
 	return ret, root, err
 }
 
-func (t *Tree) findTyped(ctx context.Context, h Hash, skipVerify bool) (ret interface{}, root Hash, err error) {
+func (t *Tree) findTyped(ctx context.Context, h Hash, skipVerify bool) (ret any, root Hash, err error) {
 	ret, root, err = t.findGeneric(ctx, h, skipVerify)
 	if err != nil {
 		return nil, nil, err
@@ -182,7 +182,7 @@ func (t *Tree) findTyped(ctx context.Context, h Hash, skipVerify bool) (ret inte
 // Find the hash in the tree. Return the value stored at the leaf under
 // that hash, or nil if not found.  Return an error if there was an
 // internal problem.
-func (t *Tree) Find(ctx context.Context, h Hash) (ret interface{}, root Hash, err error) {
+func (t *Tree) Find(ctx context.Context, h Hash) (ret any, root Hash, err error) {
 	return t.findTyped(ctx, h, false)
 }
 

@@ -31,7 +31,7 @@ func (h Hash) MarshalJSON() ([]byte, error) {
 	return []byte("\"" + hex.EncodeToString(h)[0:8] + "\""), nil
 }
 
-func (n *Node) findValueInLeaf(h Hash) interface{} {
+func (n *Node) findValueInLeaf(h Hash) any {
 	kvp := newSortedMapFromNode(n).find(h)
 	if kvp == nil {
 		return nil

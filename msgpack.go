@@ -12,17 +12,17 @@ func codecHandle() *codec.MsgpackHandle {
 	return &mh
 }
 
-func encodeToBytes(i interface{}) ([]byte, error) {
+func encodeToBytes(i any) ([]byte, error) {
 	var encoded []byte
 	err := codec.NewEncoderBytes(&encoded, codecHandle()).Encode(i)
 	return encoded, err
 }
 
-func decodeFromBytes(p interface{}, b []byte) error {
+func decodeFromBytes(p any, b []byte) error {
 	return codec.NewDecoderBytes(b, codecHandle()).Decode(p)
 }
 
-func deepEqual(i1, i2 interface{}) bool {
+func deepEqual(i1, i2 any) bool {
 	b1, e1 := encodeToBytes(i1)
 	b2, e2 := encodeToBytes(i2)
 	if e1 != nil || e2 != nil {

@@ -38,19 +38,19 @@ func testUpsertBuild(t *testing.T, numElem int, m ChildIndex, n ChildIndex) {
 }
 
 func TestSimpleBuild4by16(t *testing.T) {
-	for i := 0; i < 10; i++ {
+	for range 10 {
 		testSimpleBuild(t, 1024, ChildIndex(4), ChildIndex(16))
 	}
 }
 
 func TestSimpleBuild2by4(t *testing.T) {
-	for i := 0; i < 10; i++ {
+	for range 10 {
 		testSimpleBuild(t, 1024, ChildIndex(2), ChildIndex(4))
 	}
 }
 
 func TestSimpleBuild256by256(t *testing.T) {
-	for i := 0; i < 2; i++ {
+	for range 2 {
 		testSimpleBuild(t, 8192, ChildIndex(256), ChildIndex(256))
 	}
 }
@@ -75,19 +75,19 @@ func findAll(t *testing.T, tree *Tree, objs []KeyValuePair) {
 }
 
 func TestUpsert4by16(t *testing.T) {
-	for i := 0; i < 10; i++ {
+	for range 10 {
 		testUpsertBuild(t, 1024, ChildIndex(4), ChildIndex(16))
 	}
 }
 
 func TestUpsert2by4(t *testing.T) {
-	for i := 0; i < 10; i++ {
+	for range 10 {
 		testUpsertBuild(t, 1024, ChildIndex(2), ChildIndex(4))
 	}
 }
 
 func TestUpsertBuild256by256(t *testing.T) {
-	for i := 0; i < 2; i++ {
+	for range 2 {
 		testUpsertBuild(t, 8192, ChildIndex(256), ChildIndex(256))
 	}
 }
