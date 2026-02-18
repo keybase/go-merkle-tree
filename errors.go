@@ -27,7 +27,7 @@ func (n NodeNotFoundError) Error() string {
 // BadChildPointerError is thrown when the types of an interior node
 // are not pointers to children.
 type BadChildPointerError struct {
-	V interface{}
+	V any
 }
 
 func (b BadChildPointerError) Error() string {

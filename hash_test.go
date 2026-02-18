@@ -16,7 +16,6 @@ func TestHashLen(t *testing.T) {
 		{"middle", []byte{0, 1, 2, 3, 0, 3, 2, 1, 0}, 8},
 	}
 	for _, tt := range tests {
-		tt := tt
 		t.Run(tt.desc, func(t *testing.T) {
 			actual := tt.hash.Len()
 			if actual != tt.expected {

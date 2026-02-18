@@ -45,12 +45,12 @@ func (of *TestObjFactory) Produce() KeyValuePair {
 // Mproduce makes many test objects.
 func (of *TestObjFactory) Mproduce(n int) []KeyValuePair {
 	var ret []KeyValuePair
-	for i := 0; i < n; i++ {
+	for range n {
 		ret = append(ret, of.Produce())
 	}
 	return ret
 }
 
-func (of *TestObjFactory) Construct() interface{} {
+func (of *TestObjFactory) Construct() any {
 	return testValue{}
 }
