@@ -1,8 +1,6 @@
 package merkletree
 
-import (
-	"crypto/sha512"
-)
+import "crypto/sha512"
 
 // Len returns the number of bytes in the hash, but after shifting off
 // leading 0s from the length size of the hash
@@ -22,21 +20,28 @@ func (h Hash) cmp(h2 Hash) int {
 	if h.Len() > h2.Len() {
 		return 1
 	}
-	for i, b := range h {
-		b2 := h2[i]
-		if b < b2 {
+
+	// Preserve the historical byte ordering after the significant-length
+	// comparison. Only compare the common prefix so that inputs which used to
+	// run past the end of h2 are handled without changing any previously
+	// defined comparison result.
+	n := len(h)
+	if len(h2) < n {
+		n = len(h2)
+	}
+	for i := 0; i < n; i++ {
+		if h[i] < h2[i] {
 			return -1
 		}
-		if b > b2 {
+		if h[i] > h2[i] {
 			return 1
 		}
 	}
-	// Equal in this case
 	return 0
 }
 
-// Less determines if the receiver is less than the arg, after shifting off all
-// leading 0 bytes and using big-endian byte ordering.
+// Less determines if the receiver precedes the argument in the tree's
+// historical ordering: significant length first, then the original bytes.
 func (h Hash) Less(h2 Hash) bool {
 	return h.cmp(h2) < 0
 }

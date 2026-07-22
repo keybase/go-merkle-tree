@@ -2,6 +2,7 @@ package merkletree
 
 import (
 	"encoding/binary"
+	"fmt"
 )
 
 // Hasher is an interface for hashing MerkleTree data structures into their
@@ -51,22 +52,47 @@ func log2(y ChildIndex) ChildIndex {
 // is the number of children per interior node (we recommend 256),
 // and `n`, the maximum number of entries in a leaf before a
 // new level of the tree is introduced.
+//
+// Panics if m cannot branch or n cannot hold any entries.
 func NewConfig(h Hasher, m ChildIndex, n ChildIndex, v ValueConstructor) Config {
+	// These degenerate configurations cannot reduce a non-empty subtree and
+	// would recurse forever once a leaf needs splitting.
+	if m < 2 {
+		panic(fmt.Sprintf("invalid config: m must be at least 2, got %d", m))
+	}
+	if n == 0 {
+		panic("invalid config: n must be positive")
+	}
 	return Config{hasher: h, m: m, n: n, c: log2(m), v: v}
 }
 
-func (c Config) prefixAndIndexAtLevel(level Level, h Hash) (Prefix, ChildIndex) {
+// maxKeyLevels returns the number of complete child-index chunks available in
+// h. Tree traversal must not try to descend through an interior node once all
+// of these chunks have been consumed.
+func (c Config) maxKeyLevels(h Hash) Level {
+	if c.c == 0 {
+		return 0
+	}
+	return Level((uint64(len(h)) * 8) / uint64(c.c))
+}
+
+func (c Config) prefixAndIndexAtLevel(level Level, h Hash) (Prefix, ChildIndex, error) {
+	maxLevel := c.maxKeyLevels(h)
+	if level >= maxLevel {
+		return nil, 0, fmt.Errorf("max tree depth %d exceeded", maxLevel)
+	}
 	prfx, ci := bitslice(h, int(c.c), int(level)) //nolint:gosec // G115: Level is bounded by config
-	return prfx, ChildIndex(ci)
+	return prfx, ChildIndex(ci), nil
 }
 
 func (c Config) prefixAtLevel(level Level, h Hash) Prefix {
-	ret, _ := c.prefixAndIndexAtLevel(level, h)
+	ret, _, _ := c.prefixAndIndexAtLevel(level, h)
 	return ret
 }
 
 func (c Config) PrefixAndIndexAtLevel(level Level, h Hash) (Prefix, ChildIndex) {
-	return c.prefixAndIndexAtLevel(level, h)
+	prfx, ci, _ := c.prefixAndIndexAtLevel(level, h)
+	return prfx, ci
 }
 
 func (c Config) PrefixAtLevel(level Level, h Hash) Prefix {
