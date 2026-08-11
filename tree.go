@@ -2,6 +2,7 @@ package merkletree
 
 import (
 	"context"
+	"fmt"
 	"sync"
 )
 
@@ -54,6 +55,16 @@ func (t *Tree) hashTreeRecursive(ctx context.Context,
 	if sm.Len() <= t.cfg.n {
 		ret, err = t.makeLeaf(ctx, level, sm, prevRoot)
 		return ret, err
+	}
+
+	// Every key must have another complete index chunk available before this
+	// leaf can be split. This also stops duplicate keys from recursing forever
+	// after all of their key bits have been consumed.
+	for i := ChildIndex(0); i < sm.Len(); i++ {
+		maxLevel := t.cfg.maxKeyLevels(sm.at(i).Key)
+		if level >= maxLevel {
+			return nil, fmt.Errorf("max tree depth %d exceeded while splitting leaf", maxLevel)
+		}
 	}
 
 	m := t.cfg.m // the number of children we have
@@ -130,6 +141,13 @@ func (t *Tree) findGeneric(ctx context.Context, h Hash, skipVerify bool) (ret an
 	curr := root
 	var level Level
 	for curr != nil {
+		// Check context cancellation at each iteration
+		select {
+		case <-ctx.Done():
+			return nil, nil, ctx.Err()
+		default:
+		}
+
 		var node *Node
 		var nodeExported []byte
 		nodeExported, node, err = t.lookupNode(ctx, curr)
@@ -146,7 +164,10 @@ func (t *Tree) findGeneric(ctx context.Context, h Hash, skipVerify bool) (ret an
 			ret = node.findValueInLeaf(h)
 			return ret, root, nil
 		}
-		_, index := t.cfg.prefixAndIndexAtLevel(level, h)
+		_, index, err := t.cfg.prefixAndIndexAtLevel(level, h)
+		if err != nil {
+			return nil, nil, err
+		}
 		curr, err = node.findChildByIndex(index)
 		if err != nil {
 			return nil, nil, err
@@ -236,13 +257,26 @@ func (t *Tree) Upsert(ctx context.Context, kvp KeyValuePair, txinfo TxInfo) (err
 	// Find the path from the key up to the root;
 	// find by walking down from the root.
 	for curr != nil {
-		prefix, index := t.cfg.prefixAndIndexAtLevel(level, kvp.Key)
-		path.push(step{p: prefix, n: curr, l: level, i: index})
-		level++
+		// Check context cancellation at each iteration
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		default:
+		}
+
 		last = curr
 		if curr.Type == NodeTypeLeaf {
+			// Leaf path entries do not use their prefix or child index.
+			path.push(step{n: curr, l: level})
 			break
 		}
+
+		prefix, index, err := t.cfg.prefixAndIndexAtLevel(level, kvp.Key)
+		if err != nil {
+			return err
+		}
+		path.push(step{p: prefix, n: curr, l: level, i: index})
+		level++
 		nxt, err := curr.findChildByIndex(index)
 		if err != nil {
 			return err
