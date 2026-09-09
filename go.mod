@@ -1,8 +1,8 @@
 module github.com/keybase/go-merkle-tree
 
-go 1.24
+go 1.26.0
 
-toolchain go1.25.5
+toolchain go1.27.1
 
 require (
 	github.com/keybase/go-codec v0.0.0-20180928230036-164397562123

@@ -25,10 +25,7 @@ func (h Hash) cmp(h2 Hash) int {
 	// comparison. Only compare the common prefix so that inputs which used to
 	// run past the end of h2 are handled without changing any previously
 	// defined comparison result.
-	n := len(h)
-	if len(h2) < n {
-		n = len(h2)
-	}
+	n := min(len(h2), len(h))
 	for i := 0; i < n; i++ {
 		if h[i] < h2[i] {
 			return -1
