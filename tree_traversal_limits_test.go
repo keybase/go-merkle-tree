@@ -418,7 +418,7 @@ func TestTraversalEdgeCases(t *testing.T) {
 		require.NoError(t, tree.Upsert(ctx, obj, nil))
 
 		// Upsert same key with different value multiple times
-		for i := 0; i < 5; i++ {
+		for i := range 5 {
 			newObj := factory.Produce()
 			newObj.Key = obj.Key // Same key
 			err := tree.Upsert(ctx, newObj, nil)
